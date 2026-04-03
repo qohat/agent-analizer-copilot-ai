@@ -24,7 +24,7 @@ export function FormStep1() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-1">Información del cliente</h2>
-        <p className="text-slate-400 text-sm">Paso 1 de 5</p>
+        <p className="text-slate-400 text-sm">Paso 1 de 11</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

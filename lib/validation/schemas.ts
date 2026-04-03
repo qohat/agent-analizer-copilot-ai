@@ -52,7 +52,7 @@ const applicationBaseSchema = z.object({
   // Step 1: Client Personal Information
   clientFirstName: z.string().min(2).max(100),
   clientLastName: z.string().min(2).max(100),
-  clientIdNumber: z.string().min(5).max(20),
+  clientIdNumber: z.string().min(5, 'ID inválido').max(10, 'La cédula no puede tener más de 10 dígitos'),
   clientIdType: z.enum(['cedula', 'passport', 'dni', 'nit']),
   clientDateOfBirth: z.string().datetime().optional(),
   clientGender: z.enum(['male', 'female', 'other']).optional(),
@@ -264,12 +264,12 @@ export const applicationStep3Schema = z.object({
   clientFirstName: z.string().min(2, 'Nombre requerido').max(100),
   clientLastName: z.string().min(2, 'Apellido requerido').max(100),
   clientIdType: z.enum(['cedula', 'passport', 'dni', 'nit']),
-  clientIdNumber: z.string().min(5, 'ID inválido').max(20),
+  clientIdNumber: z.string().min(5, 'ID inválido').max(10, 'La cédula no puede tener más de 10 dígitos'),
   clientDateOfBirth: z.string().datetime().optional(),
   clientGender: z.enum(['male', 'female', 'other']).optional(),
   clientEducationLevel: z.enum(['primary', 'secondary', 'technical', 'university']).optional(),
   clientEmploymentStatus: z.enum(['employed', 'self_employed', 'unemployed', 'retired']),
-  clientPhone: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Teléfono inválido'),
+  clientPhone: z.string().regex(/^3\d{9}$/, 'El celular debe tener 10 dígitos y comenzar con 3'),
   clientEmail: z.string().email('Email inválido').optional(),
 
   // Address
@@ -281,9 +281,12 @@ export const applicationStep3Schema = z.object({
 
   // Housing info
   residenceType: z.enum(['propia', 'arrendada', 'familiar', 'prestada']).optional(),
+  residenceYears: z.number().nonnegative().optional(),
   addressResidentialTimeMonths: z.number().nonnegative().optional(),
   addressRentMonthlyAmount: z.number().nonnegative().optional(),
   addressMortgageMonthlyAmount: z.number().nonnegative().optional(),
+  landlordName: z.string().min(2).max(100).optional(),
+  rentAmount: z.number().positive().optional(),
 
   // Marital
   maritalStatus: z.enum(['single', 'married', 'common_law', 'divorced', 'widowed']),
@@ -298,6 +301,33 @@ export const applicationStep3Schema = z.object({
   addressCity: true,
   addressDepartment: true,
   maritalStatus: true,
+}).refine((data) => {
+  // Validate age >= 18 years if date of birth is provided
+  if (data.clientDateOfBirth) {
+    const birthDate = new Date(data.clientDateOfBirth)
+    const today = new Date()
+    const age = today.getFullYear() - birthDate.getFullYear()
+    const monthDiff = today.getMonth() - birthDate.getMonth()
+    const dayDiff = today.getDate() - birthDate.getDate()
+
+    // Adjust age if birthday hasn't occurred this year
+    const actualAge = (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) ? age - 1 : age
+
+    return actualAge >= 18
+  }
+  return true
+}, {
+  message: 'Debe ser mayor de 18 años',
+  path: ['clientDateOfBirth'],
+}).refine((data) => {
+  // If residence is rented, landlord name and rent amount are required
+  if (data.residenceType === 'arrendada') {
+    return !!(data.landlordName && data.rentAmount)
+  }
+  return true
+}, {
+  message: 'Complete el nombre del propietario y el monto de arriendo',
+  path: ['landlordName'],
 })
 
 export type ApplicationStep3Input = z.infer<typeof applicationStep3Schema>
@@ -308,10 +338,13 @@ export const applicationStep4Schema = z.object({
   spouseFirstName: z.string().min(2).max(100).optional(),
   spouseLastName: z.string().min(2).max(100).optional(),
   spouseIdType: z.enum(['cedula', 'passport', 'dni', 'nit']).optional(),
-  spouseIdNumber: z.string().min(5).max(20).optional(),
+  spouseIdNumber: z.string().min(5, 'ID inválido').max(10, 'La cédula no puede tener más de 10 dígitos').optional(),
   spouseDateOfBirth: z.string().datetime().optional(),
-  spousePhone: z.string().regex(/^\+?[1-9]\d{1,14}$/).optional(),
-  spouseEmail: z.string().email().optional(),
+  spousePhone: z.string().regex(/^3\d{9}$/, 'El celular debe tener 10 dígitos y comenzar con 3').optional(),
+  spouseEmail: z.string().email('Email inválido').optional(),
+  spouseIdIssuedCity: z.string().max(100).optional(),
+  spouseIdIssuedDate: z.string().datetime().optional(),
+  spouseRelationship: z.enum(['spouse', 'co_obligor']).optional(),
   spouseSameAddress: z.boolean().optional(),
   spouseEmployed: z.boolean().optional(),
   spouseIncomeSource: z.string().optional(),
@@ -320,7 +353,46 @@ export const applicationStep4Schema = z.object({
   spouseEmploymentStatus: z.string().optional(),
   spouseProfessionalActivities: z.string().optional(),
   spouseDebtObligationsMonthly: z.number().nonnegative().optional(),
-}).partial()
+
+  // Co-applicant (co-deudor) fields
+  hasCoapplicant: z.boolean().default(false),
+  coapplicantFirstName: z.string().min(2).max(100).optional(),
+  coapplicantLastName: z.string().min(2).max(100).optional(),
+  coapplicantIdType: z.enum(['cedula', 'passport', 'dni', 'nit']).optional(),
+  coapplicantIdNumber: z.string().min(5, 'ID inválido').max(10, 'La cédula no puede tener más de 10 dígitos').optional(),
+  coapplicantDateOfBirth: z.string().datetime().optional(),
+  coapplicantPhone: z.string().regex(/^3\d{9}$/, 'El celular debe tener 10 dígitos y comenzar con 3').optional(),
+  coapplicantEmail: z.string().email('Email inválido').optional(),
+}).partial().refine((data) => {
+  // If hasSpouse is true, spouse basic fields are required
+  if (data.hasSpouse) {
+    return !!(
+      data.spouseFirstName &&
+      data.spouseLastName &&
+      data.spouseIdType &&
+      data.spouseIdNumber
+    )
+  }
+  return true
+}, {
+  message: 'Complete la información básica del cónyuge (nombre, apellido, tipo y número de ID)',
+  path: ['spouseFirstName'],
+}).refine((data) => {
+  // If hasCoapplicant is true, coapplicant basic fields are required
+  if (data.hasCoapplicant) {
+    return !!(
+      data.coapplicantFirstName &&
+      data.coapplicantLastName &&
+      data.coapplicantIdType &&
+      data.coapplicantIdNumber &&
+      data.coapplicantPhone
+    )
+  }
+  return true
+}, {
+  message: 'Complete la información básica del co-deudor (nombre, apellido, tipo y número de ID, teléfono)',
+  path: ['coapplicantFirstName'],
+})
 
 export type ApplicationStep4Input = z.infer<typeof applicationStep4Schema>
 

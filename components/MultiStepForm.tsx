@@ -4,8 +4,6 @@ import { useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
-  applicationStep1Schema,
-  applicationStep2Schema,
   applicationStep3Schema,
   applicationStep4Schema,
   applicationStep5Schema,
@@ -35,29 +33,46 @@ export function MultiStepForm() {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  // FIXED: Map schemas to match what each FormStep component actually displays
+  // FormStep1 = Client info → use Step3Schema
+  // FormStep2 = Spouse → use Step4Schema
+  // FormStep3 = Business → use Step5Schema
+  // FormStep4 = Income/Expenses → use Step9Schema (more detailed than old Step4)
+  // FormStep5 = Review → use Step11Schema (final submission)
+  // FormStep6 = Assets → use Step6Schema
+  // FormStep7 = Balance Assets → use Step78Schema
+  // FormStep8 = Balance Liabilities → use Step78Schema
+  // FormStep9 = Income/Expenses detail → use Step9Schema
+  // FormStep10 = Payment capacity → use Step10Schema
+  // FormStep11 = Credit proposal → use Step11Schema
   const schemas = [
-    applicationStep1Schema,
-    applicationStep2Schema,
-    applicationStep3Schema,
-    applicationStep4Schema,
-    applicationStep5Schema,
-    applicationStep6Schema,
-    applicationStep78Schema,
-    applicationStep78Schema, // Step 7 and 8 use same schema
-    applicationStep9Schema,
-    applicationStep10Schema,
-    applicationStep11Schema,
+    applicationStep3Schema,  // Step 1: Client info
+    applicationStep4Schema,  // Step 2: Spouse
+    applicationStep5Schema,  // Step 3: Business
+    applicationStep9Schema,  // Step 4: Income/Expenses
+    applicationStep11Schema, // Step 5: Review & Submit
+    applicationStep6Schema,  // Step 6: Assets & References
+    applicationStep78Schema, // Step 7: Balance Assets
+    applicationStep78Schema, // Step 8: Balance Liabilities
+    applicationStep9Schema,  // Step 9: Income/Expenses detail
+    applicationStep10Schema, // Step 10: Payment capacity
+    applicationStep11Schema, // Step 11: Final proposal
   ]
 
   const methods = useForm({
     resolver: zodResolver(schemas[step - 1]),
-    mode: 'onBlur',
+    mode: 'onChange',  // Real-time validation for better UX
+    reValidateMode: 'onChange',
     shouldUnregister: false,
   })
 
+  // Check if current step has validation errors
+  const hasErrors = Object.keys(methods.formState.errors).length > 0
+
   const onNextStep = async () => {
-    const isValid = await methods.trigger()
-    if (isValid && step < TOTAL_STEPS) {
+    // Trigger validation to show all errors
+    const stepIsValid = await methods.trigger()
+    if (stepIsValid && step < TOTAL_STEPS) {
       setStep(step + 1)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
@@ -164,8 +179,9 @@ export function MultiStepForm() {
             <button
               type="button"
               onClick={onNextStep}
-              disabled={loading}
+              disabled={loading || hasErrors}
               className="flex-1 px-6 py-3 bg-emerald-500 text-slate-950 font-semibold rounded-lg hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+              title={hasErrors ? 'Complete todos los campos requeridos correctamente' : 'Continuar al siguiente paso'}
             >
               Siguiente
               <ChevronRight className="w-4 h-4" />

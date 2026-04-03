@@ -18,7 +18,7 @@ export function FormStep2() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-1">Cónyuge o co-obligado</h2>
-        <p className="text-slate-400 text-sm">Paso 2 de 5</p>
+        <p className="text-slate-400 text-sm">Paso 2 de 11</p>
       </div>
 
       <div className="space-y-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700">
