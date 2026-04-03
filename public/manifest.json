@@ -1,0 +1,101 @@
+{
+  "name": "Copiloto de Crédito - Asesores en Campo",
+  "short_name": "Copiloto Crédito",
+  "description": "Aplicación móvil offline-first para captura y análisis IA de solicitudes de crédito en campo",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "theme_color": "#1f2937",
+  "background_color": "#ffffff",
+  "screenshots": [
+    {
+      "src": "/images/screenshot-1.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "purpose": "any",
+      "form_factor": "narrow"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["finance", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Nueva Solicitud",
+      "short_name": "Nueva",
+      "description": "Crear nueva solicitud de crédito",
+      "url": "/advisor/new-application?utm_source=pwa_shortcut",
+      "icons": [
+        {
+          "src": "/icons/shortcut-new.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Sincronizar Ahora",
+      "short_name": "Sincronizar",
+      "description": "Sincronizar solicitudes pendientes",
+      "url": "/advisor/sync?utm_source=pwa_shortcut",
+      "icons": [
+        {
+          "src": "/icons/shortcut-sync.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "screenshots": [
+    {
+      "src": "/images/screenshot-narrow-1.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Formulario de solicitud"
+    },
+    {
+      "src": "/images/screenshot-wide-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Panel del comité de crédito"
+    }
+  ]
+}
