@@ -1,29 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { step1SolicitudSchema } from '@/lib/validation/step1-solicitud.schema'
+import { step2TipoProductoSchema } from '@/lib/validation/step2-tipo-producto.schema'
+import { step3DatosPersonalesSchema } from '@/lib/validation/step3-datos-personales.schema'
+import { step4DomicilioSchema } from '@/lib/validation/step4-domicilio.schema'
+import { step5NegocioSchema } from '@/lib/validation/step5-negocio.schema'
 import {
-  applicationStep3Schema,
-  applicationStep4Schema,
-  applicationStep5Schema,
-  applicationStep6Schema,
-  applicationStep78Schema,
-  applicationStep9Schema,
-  applicationStep10Schema,
-  applicationStep11Schema,
-} from '@/lib/validation/schemas'
-import { FormStep1 } from './FormStep1'
-import { FormStep2 } from './FormStep2'
-import { FormStep3 } from './FormStep3'
-import { FormStep4 } from './FormStep4'
-import { FormStep5 } from './FormStep5'
-import { FormStep6 } from './FormStep6'
-import { FormStep7 } from './FormStep7'
-import { FormStep8 } from './FormStep8'
-import { FormStep9 } from './FormStep9'
-import { FormStep10 } from './FormStep10'
-import { FormStep11 } from './FormStep11'
+  step6ConyugeSchema,
+  step7BienesSchema,
+  step8BalanceSchema,
+  step9IngresosGastosSchema,
+  step10CapacidadPagoSchema,
+  step11ResumenSchema,
+} from '@/lib/validation/step6-11-schemas'
+import { FormStep1New } from './FormStep1New'
+import { FormStep2New } from './FormStep2New'
+import { FormStep3New } from './FormStep3New'
+import { FormStep4New } from './FormStep4New'
+import { FormStep5New } from './FormStep5New'
+import {
+  FormStep6New,
+  FormStep7New,
+  FormStep8New,
+  FormStep9New,
+  FormStep10New,
+  FormStep11New,
+} from './FormSteps6-11'
 import { ChevronLeft, ChevronRight, Loader2, CheckCircle2 } from 'lucide-react'
 
 const TOTAL_STEPS = 11
@@ -33,30 +38,18 @@ export function MultiStepForm() {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // FIXED: Map schemas to match what each FormStep component actually displays
-  // FormStep1 = Client info → use Step3Schema
-  // FormStep2 = Spouse → use Step4Schema
-  // FormStep3 = Business → use Step5Schema
-  // FormStep4 = Income/Expenses → use Step9Schema (more detailed than old Step4)
-  // FormStep5 = Review → use Step11Schema (final submission)
-  // FormStep6 = Assets → use Step6Schema
-  // FormStep7 = Balance Assets → use Step78Schema
-  // FormStep8 = Balance Liabilities → use Step78Schema
-  // FormStep9 = Income/Expenses detail → use Step9Schema
-  // FormStep10 = Payment capacity → use Step10Schema
-  // FormStep11 = Credit proposal → use Step11Schema
   const schemas = [
-    applicationStep3Schema,  // Step 1: Client info
-    applicationStep4Schema,  // Step 2: Spouse
-    applicationStep5Schema,  // Step 3: Business
-    applicationStep9Schema,  // Step 4: Income/Expenses
-    applicationStep11Schema, // Step 5: Review & Submit
-    applicationStep6Schema,  // Step 6: Assets & References
-    applicationStep78Schema, // Step 7: Balance Assets
-    applicationStep78Schema, // Step 8: Balance Liabilities
-    applicationStep9Schema,  // Step 9: Income/Expenses detail
-    applicationStep10Schema, // Step 10: Payment capacity
-    applicationStep11Schema, // Step 11: Final proposal
+    step1SolicitudSchema,       // Step 1: Datos de Solicitud ✅
+    step2TipoProductoSchema,    // Step 2: Tipo de Producto ✅
+    step3DatosPersonalesSchema, // Step 3: Datos Personales ✅
+    step4DomicilioSchema,       // Step 4: Domicilio ✅
+    step5NegocioSchema,         // Step 5: Negocio ✅
+    step6ConyugeSchema,         // Step 6: Cónyuge ✅
+    step7BienesSchema,          // Step 7: Bienes y Referencias ✅
+    step8BalanceSchema,         // Step 8: Balance General ✅
+    step9IngresosGastosSchema,  // Step 9: Ingresos y Gastos ✅
+    step10CapacidadPagoSchema,  // Step 10: Capacidad de Pago ✅
+    step11ResumenSchema,        // Step 11: Resumen y Envío ✅
   ]
 
   const methods = useForm({
@@ -65,6 +58,11 @@ export function MultiStepForm() {
     reValidateMode: 'onChange',
     shouldUnregister: false,
   })
+
+  // Update resolver when step changes
+  React.useEffect(() => {
+    methods.clearErrors()
+  }, [step, methods])
 
   // Check if current step has validation errors
   const hasErrors = Object.keys(methods.formState.errors).length > 0
@@ -150,17 +148,17 @@ export function MultiStepForm() {
 
         {/* Form Steps */}
         <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-8">
-          {step === 1 && <FormStep1 />}
-          {step === 2 && <FormStep2 />}
-          {step === 3 && <FormStep3 />}
-          {step === 4 && <FormStep4 />}
-          {step === 5 && <FormStep5 />}
-          {step === 6 && <FormStep6 />}
-          {step === 7 && <FormStep7 />}
-          {step === 8 && <FormStep8 />}
-          {step === 9 && <FormStep9 />}
-          {step === 10 && <FormStep10 />}
-          {step === 11 && <FormStep11 />}
+          {step === 1 && <FormStep1New />}
+          {step === 2 && <FormStep2New />}
+          {step === 3 && <FormStep3New />}
+          {step === 4 && <FormStep4New />}
+          {step === 5 && <FormStep5New />}
+          {step === 6 && <FormStep6New />}
+          {step === 7 && <FormStep7New />}
+          {step === 8 && <FormStep8New />}
+          {step === 9 && <FormStep9New />}
+          {step === 10 && <FormStep10New />}
+          {step === 11 && <FormStep11New />}
         </div>
 
         {/* Navigation */}
