@@ -4,6 +4,7 @@
 
 'use client'
 
+import React from 'react'
 import { useFormContext } from 'react-hook-form'
 import { TIPOS_VIVIENDA, getNombreTipoVivienda, type TipoVivienda } from '@/lib/validation/step4-domicilio.schema'
 import { MapPin, Home } from 'lucide-react'
@@ -12,10 +13,19 @@ export function FormStep4New() {
   const {
     register,
     watch,
+    setValue,
     formState: { errors },
   } = useFormContext()
 
   const tipoVivienda = watch('tipoVivienda')
+
+  // Limpiar campos cuando cambia el tipo de vivienda
+  React.useEffect(() => {
+    if (tipoVivienda && tipoVivienda !== 'arrendada') {
+      setValue('nombrePropietario', '')
+      setValue('valorArrendado', undefined)
+    }
+  }, [tipoVivienda, setValue])
 
   return (
     <div className="space-y-6">

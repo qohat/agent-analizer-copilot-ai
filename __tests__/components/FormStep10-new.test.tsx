@@ -41,14 +41,14 @@ describe('FormStep10New - Capacidad de Pago', () => {
     it('should show informational panel', () => {
       render(<FormStep10Wrapper />)
 
-      expect(screen.getByText(/Análisis automático/i)).toBeInTheDocument()
-      expect(screen.getByText(/calculará automáticamente/i)).toBeInTheDocument()
+      expect(screen.getByText(/Análisis de su capacidad para asumir el crédito/i)).toBeInTheDocument()
+      expect(screen.getByText(/Suma de todas las cuotas de créditos actuales/i)).toBeInTheDocument()
     })
 
     it('should have helper text', () => {
       render(<FormStep10Wrapper />)
 
-      expect(screen.getByText(/Suma de todas sus cuotas de créditos actuales/i)).toBeInTheDocument()
+      expect(screen.getByText(/Suma de todas las cuotas de créditos actuales/i)).toBeInTheDocument()
     })
   })
 

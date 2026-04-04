@@ -13,10 +13,10 @@ export const step5NegocioSchema = z.object({
 
   direccionIgualCasa: z.boolean().default(false).optional(),
 
-  departamentoNegocio: z.string().min(3).max(50).optional(),
-  municipioNegocio: z.string().min(3).max(50).optional(),
-  direccionNegocio: z.string().min(10).max(200).optional(),
-  barrioVeredaNegocio: z.string().max(100).optional(),
+  departamentoNegocio: z.string().min(3, 'Mínimo 3 caracteres').max(50).or(z.literal('')).optional(),
+  municipioNegocio: z.string().min(3, 'Mínimo 3 caracteres').max(50).or(z.literal('')).optional(),
+  direccionNegocio: z.string().min(10, 'Mínimo 10 caracteres').max(200).or(z.literal('')).optional(),
+  barrioVeredaNegocio: z.string().max(100).or(z.literal('')).optional(),
 
   numeroEmpleados: z
     .number()
@@ -33,7 +33,21 @@ export const step5NegocioSchema = z.object({
     .min(0, 'No puede ser negativo')
     .max(100, 'Máximo 100 años'),
 
-  telefonoFijoNegocio: z.string().regex(/^[0-9]{7,10}$/).optional(),
-})
+  telefonoFijoNegocio: z.string().regex(/^[0-9]{7,10}$/).or(z.literal('')).optional(),
+}).refine(
+  (data) => {
+    // Si la dirección NO es igual a casa, los campos son requeridos
+    if (!data.direccionIgualCasa) {
+      return !!data.departamentoNegocio && data.departamentoNegocio.length >= 3 &&
+             !!data.municipioNegocio && data.municipioNegocio.length >= 3 &&
+             !!data.direccionNegocio && data.direccionNegocio.length >= 10
+    }
+    return true
+  },
+  {
+    message: 'Complete la ubicación del negocio o marque que es igual a su domicilio',
+    path: ['direccionNegocio'],
+  }
+)
 
 export type Step5NegocioData = z.infer<typeof step5NegocioSchema>

@@ -7,6 +7,7 @@ describe('Step 5: Negocio Schema', () => {
       numeroEmpleados: 5,
       celularNegocio: '3001234567',
       anosOperacion: 3,
+      direccionIgualCasa: true,
     }
     expect(step5NegocioSchema.safeParse(data).success).toBe(true)
   })
@@ -27,6 +28,32 @@ describe('Step 5: Negocio Schema', () => {
       numeroEmpleados: -1,
       celularNegocio: '3001234567',
       anosOperacion: 1,
+      direccionIgualCasa: true,
+    }
+    expect(step5NegocioSchema.safeParse(data).success).toBe(false)
+  })
+
+  it('should validate when direccionIgualCasa is false and all address fields provided', () => {
+    const data = {
+      actividadEconomica: 'Comercio de productos agrícolas',
+      numeroEmpleados: 5,
+      celularNegocio: '3001234567',
+      anosOperacion: 3,
+      direccionIgualCasa: false,
+      departamentoNegocio: 'Antioquia',
+      municipioNegocio: 'Medellín',
+      direccionNegocio: 'Calle 10 # 20-30',
+    }
+    expect(step5NegocioSchema.safeParse(data).success).toBe(true)
+  })
+
+  it('should reject when direccionIgualCasa is false and address fields missing', () => {
+    const data = {
+      actividadEconomica: 'Comercio de productos agrícolas',
+      numeroEmpleados: 5,
+      celularNegocio: '3001234567',
+      anosOperacion: 3,
+      direccionIgualCasa: false,
     }
     expect(step5NegocioSchema.safeParse(data).success).toBe(false)
   })

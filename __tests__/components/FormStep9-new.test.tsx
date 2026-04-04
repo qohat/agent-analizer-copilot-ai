@@ -37,7 +37,7 @@ describe('FormStep9New - Ingresos y Gastos', () => {
       const headings = screen.getAllByRole('heading', { level: 3 })
       const ingresosHeading = headings.find(h => h.textContent?.match(/Ingresos/i))
       expect(ingresosHeading).toBeInTheDocument()
-      expect(screen.getByLabelText(/Ingresos mensuales titular/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Ingresos mensuales/i)).toBeInTheDocument()
     })
 
     it('should render gastos section', () => {
@@ -64,7 +64,7 @@ describe('FormStep9New - Ingresos y Gastos', () => {
     it('should allow filling ingresos titular', async () => {
       render(<FormStep9Wrapper />)
 
-      const ingresosInput = screen.getByLabelText(/Ingresos mensuales titular/i)
+      const ingresosInput = screen.getByLabelText(/Ingresos mensuales/i)
 
       fireEvent.change(ingresosInput, { target: { value: '3000000' } })
 
@@ -89,7 +89,7 @@ describe('FormStep9New - Ingresos y Gastos', () => {
     it('should show capacidad disponible when values entered', async () => {
       render(<FormStep9Wrapper />)
 
-      const ingresosInput = screen.getByLabelText(/Ingresos mensuales titular/i)
+      const ingresosInput = screen.getByLabelText(/Ingresos mensuales/i)
       const alimentacionInput = screen.getByLabelText(/Alimentación/i)
 
       fireEvent.change(ingresosInput, { target: { value: '3000000' } })
@@ -115,7 +115,7 @@ describe('FormStep9New - Ingresos y Gastos', () => {
     it('should have all inputs with type="number"', () => {
       render(<FormStep9Wrapper />)
 
-      const ingresosInput = screen.getByLabelText(/Ingresos mensuales titular/i)
+      const ingresosInput = screen.getByLabelText(/Ingresos mensuales/i)
       expect(ingresosInput).toHaveAttribute('type', 'number')
     })
   })
@@ -124,7 +124,7 @@ describe('FormStep9New - Ingresos y Gastos', () => {
     it('should display correct capacidad disponible', async () => {
       render(<FormStep9Wrapper />)
 
-      fireEvent.change(screen.getByLabelText(/Ingresos mensuales titular/i), {
+      fireEvent.change(screen.getByLabelText(/Ingresos mensuales/i), {
         target: { value: '5000000' },
       })
       fireEvent.change(screen.getByLabelText(/Alimentación/i), { target: { value: '1000000' } })

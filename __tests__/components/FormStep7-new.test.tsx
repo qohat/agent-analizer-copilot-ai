@@ -91,7 +91,8 @@ describe('FormStep7New - Bienes y Referencias', () => {
       render(<FormStep7Wrapper />)
 
       expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument()
-      expect(screen.getByRole('heading', { level: 3 })).toBeInTheDocument()
+      const h3Headings = screen.getAllByRole('heading', { level: 3 })
+      expect(h3Headings.length).toBeGreaterThan(0)
     })
   })
 })

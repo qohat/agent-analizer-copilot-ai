@@ -134,6 +134,7 @@ export const step3DatosPersonalesSchema = z.object({
   telefonoFijo: z
     .string()
     .regex(/^[0-9]{7,10}$/, 'El teléfono fijo debe tener entre 7 y 10 dígitos')
+    .or(z.literal(''))
     .optional(),
 
   celular: z

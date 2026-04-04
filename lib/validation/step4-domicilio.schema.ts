@@ -38,24 +38,26 @@ export const step4DomicilioSchema = z
 
     tipoVivienda: z.enum(['propia', 'arrendada', 'familiar', 'otra']).optional(),
 
-    nombrePropietario: z.string().min(5, 'Mínimo 5 caracteres').max(100).optional(),
+    nombrePropietario: z.string().min(5, 'Mínimo 5 caracteres').max(100).or(z.literal('')).optional(),
 
     valorArrendado: z
       .number()
       .min(0, 'El valor debe ser positivo')
       .max(100000000, 'Valor máximo: $100.000.000')
+      .or(z.nan())
       .optional(),
   })
   .refine(
     (data) => {
       if (data.tipoVivienda === 'arrendada') {
-        return !!data.nombrePropietario && data.valorArrendado !== undefined
+        return !!data.nombrePropietario && data.nombrePropietario.length >= 5 &&
+               data.valorArrendado !== undefined && !isNaN(data.valorArrendado) && data.valorArrendado > 0
       }
       return true
     },
     {
       message: 'Si la vivienda es arrendada, debe indicar el propietario y el valor',
-      path: ['tipoVivienda'],
+      path: ['nombrePropietario'],
     }
   )
 

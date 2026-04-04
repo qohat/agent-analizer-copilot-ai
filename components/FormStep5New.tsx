@@ -4,6 +4,7 @@
 
 'use client'
 
+import React from 'react'
 import { useFormContext } from 'react-hook-form'
 import { Briefcase } from 'lucide-react'
 
@@ -11,10 +12,27 @@ export function FormStep5New() {
   const {
     register,
     watch,
+    setValue,
     formState: { errors },
   } = useFormContext()
 
   const direccionIgualCasa = watch('direccionIgualCasa')
+
+  // Campos del domicilio (Step 4)
+  const departamento = watch('departamento')
+  const municipio = watch('municipio')
+  const direccion = watch('direccion')
+  const barrioVereda = watch('barrioVereda')
+
+  // Poblar automáticamente cuando se marca el checkbox
+  React.useEffect(() => {
+    if (direccionIgualCasa) {
+      setValue('departamentoNegocio', departamento || '')
+      setValue('municipioNegocio', municipio || '')
+      setValue('direccionNegocio', direccion || '')
+      setValue('barrioVeredaNegocio', barrioVereda || '')
+    }
+  }, [direccionIgualCasa, departamento, municipio, direccion, barrioVereda, setValue])
 
   return (
     <div className="space-y-6">
@@ -110,35 +128,76 @@ export function FormStep5New() {
 
         {!direccionIgualCasa && (
           <div className="space-y-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700">
-            <h4 className="font-medium text-sm">Ubicación del negocio</h4>
+            <h4 className="font-medium text-sm">Ubicación del negocio <span className="text-red-400">*</span></h4>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label htmlFor="departamentoNegocio">Departamento</label>
+                <label htmlFor="departamentoNegocio" className="block text-sm font-medium">
+                  Departamento <span className="text-red-400">*</span>
+                </label>
                 <input
                   id="departamentoNegocio"
                   type="text"
+                  placeholder="Ej: Antioquia"
                   {...register('departamentoNegocio')}
+                  className={errors.departamentoNegocio ? 'border-red-500' : ''}
                 />
+                {errors.departamentoNegocio && (
+                  <p className="text-sm text-red-400" role="alert">{String(errors.departamentoNegocio.message)}</p>
+                )}
               </div>
               <div className="space-y-2">
-                <label htmlFor="municipioNegocio">Municipio</label>
+                <label htmlFor="municipioNegocio" className="block text-sm font-medium">
+                  Municipio <span className="text-red-400">*</span>
+                </label>
                 <input
                   id="municipioNegocio"
                   type="text"
+                  placeholder="Ej: Medellín"
                   {...register('municipioNegocio')}
+                  className={errors.municipioNegocio ? 'border-red-500' : ''}
                 />
+                {errors.municipioNegocio && (
+                  <p className="text-sm text-red-400" role="alert">{String(errors.municipioNegocio.message)}</p>
+                )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="direccionNegocio">Dirección</label>
+              <label htmlFor="direccionNegocio" className="block text-sm font-medium">
+                Dirección <span className="text-red-400">*</span>
+              </label>
               <input
                 id="direccionNegocio"
                 type="text"
+                placeholder="Ej: Calle 10 # 20-30"
                 {...register('direccionNegocio')}
+                className={errors.direccionNegocio ? 'border-red-500' : ''}
+              />
+              {errors.direccionNegocio && (
+                <p className="text-sm text-red-400" role="alert">{String(errors.direccionNegocio.message)}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="barrioVeredaNegocio" className="block text-sm font-medium">
+                Barrio o Vereda (opcional)
+              </label>
+              <input
+                id="barrioVeredaNegocio"
+                type="text"
+                placeholder="Ej: El Poblado"
+                {...register('barrioVeredaNegocio')}
               />
             </div>
+          </div>
+        )}
+
+        {direccionIgualCasa && (
+          <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+            <p className="text-sm text-emerald-300">
+              ✓ Se usará la misma dirección de su domicilio para el negocio
+            </p>
           </div>
         )}
       </div>
