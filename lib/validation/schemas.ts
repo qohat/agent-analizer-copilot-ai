@@ -146,7 +146,6 @@ const applicationBaseSchema = z.object({
   collateralType: z.enum(['none', 'real_estate', 'equipment', 'vehicles', 'inventory', 'other']).optional(),
   collateralValue: z.number().nonnegative().optional(),
   insuranceInterest: z.boolean().default(false),
-  acceptTerms: z.boolean(),
 })
 
 /**
@@ -572,7 +571,6 @@ export const applicationStep11Schema = z.object({
   requestedUseDetail: z.string().optional(),
   status: z.enum(['draft', 'submitted', 'under_review', 'approved', 'rejected']).default('draft'),
   notes: z.string().max(1000).optional(),
-  acceptTerms: z.boolean().default(false),
 }).partial().required({
   requestedAmount: true,
   requestedMonths: true,

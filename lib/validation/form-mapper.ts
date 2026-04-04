@@ -113,8 +113,10 @@ export function mapFormDataToApplicationCreate(formData: any): Partial<Applicati
     ),
     secondaryIncomeMonthly: parseNumber(
       formData.ingresos?.otrosIngresosTitular ||
+      formData.ingresos?.ingresosSecundarios ||
       formData.otrosIngresosTitular ||
       formData.otrosIngresos ||
+      formData.ingresosSecundarios ||
       0
     ),
     hasSecondaryIncome: parseNumber(
@@ -142,10 +144,19 @@ export function mapFormDataToApplicationCreate(formData: any): Partial<Applicati
       0
     ),
     businessExpensesMonthly: parseNumber(formData.gastosNegocio || formData.gastosOperacionales || formData.gastosNegocioMensuales || 0),
-    debtObligationsMonthly: parseNumber(formData.obligacionesFinancieras || formData.cuotasCreditos || formData.obligacionesMensuales || 0),
-
-    // Step 11: Términos y condiciones
-    acceptTerms: formData.aceptaTerminos || false,
+    debtObligationsMonthly: parseNumber(
+      formData.obligacionesFinancieras ||
+      formData.cuotasCreditos ||
+      formData.obligacionesMensuales ||
+      (formData.gastos?.obligaciones ? (
+        parseNumber(formData.gastos.obligaciones.creditosVivienda) +
+        parseNumber(formData.gastos.obligaciones.creditosConsumo) +
+        parseNumber(formData.gastos.obligaciones.creditosVehiculo) +
+        parseNumber(formData.gastos.obligaciones.tarjetasCredito) +
+        parseNumber(formData.gastos.obligaciones.otros)
+      ) : 0) ||
+      0
+    ),
   } as Partial<ApplicationCreateInput>
 }
 
@@ -226,53 +237,65 @@ export function mapFormDataToApplicationRecord(formData: any): Record<string, an
 
     // Step 7: Vehículos (Arrays from form)
     vehicles_count: formData.vehiculos?.length || 0,
-    vehicle_1_type: formData.vehiculos?.[0]?.clase || '',
-    vehicle_1_year: parseNumber(formData.vehiculos?.[0]?.modelo) || 0,
+    vehicle_1_type: formData.vehiculos?.[0]?.tipo || formData.vehiculos?.[0]?.clase || '',
+    vehicle_1_year: parseNumber(formData.vehiculos?.[0]?.anio || formData.vehiculos?.[0]?.año) || 0,
     vehicle_1_make: formData.vehiculos?.[0]?.marca || '',
     vehicle_1_model: formData.vehiculos?.[0]?.modelo || '',
-    vehicle_1_value: parseNumber(formData.vehiculos?.[0]?.valorComercial) || 0,
+    vehicle_1_value: parseNumber(formData.vehiculos?.[0]?.valorComercial || formData.vehiculos?.[0]?.valor) || 0,
     vehicle_1_registration_number: formData.vehiculos?.[0]?.placa || '',
 
-    vehicle_2_type: formData.vehiculos?.[1]?.clase || '',
-    vehicle_2_year: parseNumber(formData.vehiculos?.[1]?.modelo) || 0,
+    vehicle_2_type: formData.vehiculos?.[1]?.tipo || formData.vehiculos?.[1]?.clase || '',
+    vehicle_2_year: parseNumber(formData.vehiculos?.[1]?.anio || formData.vehiculos?.[1]?.año) || 0,
     vehicle_2_make: formData.vehiculos?.[1]?.marca || '',
     vehicle_2_model: formData.vehiculos?.[1]?.modelo || '',
     vehicle_2_value: parseNumber(formData.vehiculos?.[1]?.valorComercial) || 0,
     vehicle_2_registration_number: formData.vehiculos?.[1]?.placa || '',
 
     // Step 7: Referencias
-    reference_1_name: formData.referencias?.[0]?.nombre || '',
-    reference_1_relationship: formData.referencias?.[0]?.parentesco || '',
-    reference_1_phone: formData.referencias?.[0]?.celular || '',
-    reference_1_knows_client_years: parseNumber(formData.referencias?.[0]?.tiempoConocimiento) || 0,
+    reference_1_name: formData.referencias?.familiar?.nombre || formData.referencias?.[0]?.nombre || '',
+    reference_1_relationship: formData.referencias?.familiar?.parentesco || formData.referencias?.[0]?.parentesco || 'familiar',
+    reference_1_phone: formData.referencias?.familiar?.telefono || formData.referencias?.[0]?.celular || '',
+    reference_1_knows_client_years: parseNumber(formData.referencias?.familiar?.tiempoConocimiento || formData.referencias?.[0]?.tiempoConocimiento) || 0,
 
-    reference_2_name: formData.referencias?.[1]?.nombre || '',
-    reference_2_relationship: formData.referencias?.[1]?.parentesco || '',
-    reference_2_phone: formData.referencias?.[1]?.celular || '',
-    reference_2_knows_client_years: parseNumber(formData.referencias?.[1]?.tiempoConocimiento) || 0,
+    reference_2_name: formData.referencias?.comercial?.nombre || formData.referencias?.[1]?.nombre || '',
+    reference_2_relationship: formData.referencias?.comercial?.parentesco || formData.referencias?.[1]?.parentesco || 'comercial',
+    reference_2_phone: formData.referencias?.comercial?.telefono || formData.referencias?.[1]?.celular || '',
+    reference_2_knows_client_years: parseNumber(formData.referencias?.comercial?.tiempoConocimiento || formData.referencias?.[1]?.tiempoConocimiento) || 0,
 
-    reference_3_name: formData.referencias?.[2]?.nombre || '',
-    reference_3_relationship: formData.referencias?.[2]?.parentesco || '',
-    reference_3_phone: formData.referencias?.[2]?.celular || '',
-    reference_3_knows_client_years: parseNumber(formData.referencias?.[2]?.tiempoConocimiento) || 0,
+    reference_3_name: formData.referencias?.personal?.nombre || formData.referencias?.[2]?.nombre || '',
+    reference_3_relationship: formData.referencias?.personal?.parentesco || formData.referencias?.[2]?.parentesco || 'personal',
+    reference_3_phone: formData.referencias?.personal?.telefono || formData.referencias?.[2]?.celular || '',
+    reference_3_knows_client_years: parseNumber(formData.referencias?.personal?.tiempoConocimiento || formData.referencias?.[2]?.tiempoConocimiento) || 0,
 
     // Step 8: Balance General - Assets
-    assets_cash_and_equivalents: parseNumber(formData.activos?.efectivo) || 0,
-    assets_savings_accounts: parseNumber(formData.activos?.ahorros) || 0,
+    // Support both flat structure (activos.efectivo) and nested structure (activos.corrientes.caja.negocio + familiar)
+    assets_cash_and_equivalents: parseNumber(formData.activos?.efectivo) ||
+      (parseNumber(formData.activos?.corrientes?.caja?.negocio) + parseNumber(formData.activos?.corrientes?.caja?.familiar)) || 0,
+    assets_savings_accounts: parseNumber(formData.activos?.ahorros) ||
+      (parseNumber(formData.activos?.corrientes?.bancosAhorrosCDT?.negocio) + parseNumber(formData.activos?.corrientes?.bancosAhorrosCDT?.familiar)) || 0,
     assets_checking_accounts: parseNumber(formData.activos?.corriente) || 0,
-    assets_accounts_receivable_trade: parseNumber(formData.activos?.cuentasXCobrar) || 0,
-    assets_inventory_raw_materials: parseNumber(formData.activos?.inventarioMP) || 0,
+    assets_accounts_receivable_trade: parseNumber(formData.activos?.cuentasXCobrar) ||
+      (parseNumber(formData.activos?.corrientes?.cuentasPorCobrar?.negocio) + parseNumber(formData.activos?.corrientes?.cuentasPorCobrar?.familiar)) || 0,
+    assets_inventory_raw_materials: parseNumber(formData.activos?.inventarioMP) ||
+      (parseNumber(formData.activos?.corrientes?.inventarios?.negocio) + parseNumber(formData.activos?.corrientes?.inventarios?.familiar)) || 0,
     assets_inventory_finished_goods: parseNumber(formData.activos?.inventarioPT) || 0,
-    assets_land: parseNumber(formData.activos?.terrenos) || 0,
+    assets_land: parseNumber(formData.activos?.terrenos) ||
+      (parseNumber(formData.activos?.fijos?.terrenosEdificaciones?.negocio) + parseNumber(formData.activos?.fijos?.terrenosEdificaciones?.familiar)) || 0,
     assets_buildings_structures: parseNumber(formData.activos?.construcciones) || 0,
     assets_furniture_fixtures: parseNumber(formData.activos?.mueblesFijos) || 0,
-    assets_machinery_equipment: parseNumber(formData.activos?.maquinaria) || 0,
-    assets_vehicles_fixed: parseNumber(formData.activos?.vehiculosActivos) || 0,
+    assets_machinery_equipment: parseNumber(formData.activos?.maquinaria) ||
+      (parseNumber(formData.activos?.fijos?.maquinariaEquipo?.negocio) + parseNumber(formData.activos?.fijos?.maquinariaEquipo?.familiar)) || 0,
+    assets_vehicles_fixed: parseNumber(formData.activos?.vehiculosActivos) ||
+      (parseNumber(formData.activos?.fijos?.vehiculos?.negocio) + parseNumber(formData.activos?.fijos?.vehiculos?.familiar)) || 0,
 
     // Step 8: Balance General - Liabilities
-    liabilities_accounts_payable_trade: parseNumber(formData.pasivos?.cuentasXPagar) || 0,
-    liabilities_short_term_loans: parseNumber(formData.pasivos?.creditosCortoPlazo) || 0,
-    liabilities_long_term_loans: parseNumber(formData.pasivos?.creditosLargoPlazo) || 0,
+    // Support both flat and nested structure
+    liabilities_accounts_payable_trade: parseNumber(formData.pasivos?.cuentasXPagar) ||
+      (parseNumber(formData.pasivos?.corriente?.proveedores?.negocio) + parseNumber(formData.pasivos?.corriente?.proveedores?.familiar)) || 0,
+    liabilities_short_term_loans: parseNumber(formData.pasivos?.creditosCortoPlazo) ||
+      (parseNumber(formData.pasivos?.corriente?.obligacionesBancarias?.negocio) + parseNumber(formData.pasivos?.corriente?.obligacionesBancarias?.familiar)) || 0,
+    liabilities_long_term_loans: parseNumber(formData.pasivos?.creditosLargoPlazo) ||
+      (parseNumber(formData.pasivos?.largoPlazo?.obligacionesBancarias?.negocio) + parseNumber(formData.pasivos?.largoPlazo?.obligacionesBancarias?.familiar)) || 0,
 
     // Step 9: Income & Expenses (detailed)
     primary_income_source: mapped.primaryIncomeSource,
@@ -282,8 +305,16 @@ export function mapFormDataToApplicationRecord(formData: any): Record<string, an
     business_expenses_monthly: mapped.businessExpensesMonthly,
     debt_obligations_monthly: mapped.debtObligationsMonthly,
 
-    // Step 11: Términos
-    accept_terms: mapped.acceptTerms,
+    // Detailed household expenses
+    expenses_food_groceries: parseNumber(formData.gastos?.familiares?.alimentacion) || 0,
+    expenses_housing_rent_mortgage: parseNumber(formData.gastos?.familiares?.vivienda) || 0,
+    expenses_utilities_electricity: parseNumber(formData.gastos?.familiares?.serviciosPublicos) || 0,
+    expenses_transportation_public: parseNumber(formData.gastos?.familiares?.transporte) || 0,
+    expenses_education_tuition: parseNumber(formData.gastos?.familiares?.educacion) || 0,
+    expenses_healthcare_insurance: parseNumber(formData.gastos?.familiares?.salud) || 0,
+    expenses_clothing: parseNumber(formData.gastos?.familiares?.vestuario) || 0,
+    expenses_recreation_entertainment: parseNumber(formData.gastos?.familiares?.recreacion) || 0,
+    expenses_miscellaneous: parseNumber(formData.gastos?.familiares?.otros) || 0,
   }
 }
 
