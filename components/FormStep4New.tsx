@@ -162,6 +162,7 @@ export function FormStep4New() {
                 id="valorArrendado"
                 type="text"
                 inputMode="numeric"
+                pattern="[0-9]*"
                 placeholder="500000"
                 {...register('valorArrendado', {
                   setValueAs: (v) => {
@@ -169,9 +170,10 @@ export function FormStep4New() {
                     return cleaned === '' ? 0 : parseInt(cleaned, 10)
                   },
                 })}
-                onInput={(e) => {
-                  const input = e.target as HTMLInputElement
-                  input.value = input.value.replace(/[^0-9]/g, '')
+                onKeyDown={(e) => {
+                  if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                    e.preventDefault()
+                  }
                 }}
                 className={errors.valorArrendado ? 'border-red-500' : ''}
               />

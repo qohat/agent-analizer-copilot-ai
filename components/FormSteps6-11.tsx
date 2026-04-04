@@ -207,15 +207,17 @@ export function FormStep7New() {
                 <input
                   type="text"
                   inputMode="numeric"
+                  pattern="[0-9]*"
                   {...register(`bienesRaices.${index}.avaluoComercial`, {
                     setValueAs: (v) => {
                       const cleaned = String(v || '').replace(/[^0-9]/g, '')
                       return cleaned === '' ? 0 : parseInt(cleaned, 10)
                     },
                   })}
-                  onInput={(e) => {
-                    const input = e.target as HTMLInputElement
-                    input.value = input.value.replace(/[^0-9]/g, '')
+                  onKeyDown={(e) => {
+                    if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                      e.preventDefault()
+                    }
                   }}
                   placeholder="0"
                   className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white"
@@ -287,15 +289,17 @@ export function FormStep7New() {
                 <input
                   type="text"
                   inputMode="numeric"
+                  pattern="[0-9]*"
                   {...register(`vehiculos.${index}.modelo`, {
                     setValueAs: (v) => {
                       const cleaned = String(v || '').replace(/[^0-9]/g, '')
                       return cleaned === '' ? 0 : parseInt(cleaned, 10)
                     },
                   })}
-                  onInput={(e) => {
-                    const input = e.target as HTMLInputElement
-                    input.value = input.value.replace(/[^0-9]/g, '')
+                  onKeyDown={(e) => {
+                    if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                      e.preventDefault()
+                    }
                   }}
                   placeholder="2020"
                   className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white"
@@ -310,15 +314,17 @@ export function FormStep7New() {
                 <input
                   type="text"
                   inputMode="numeric"
+                  pattern="[0-9]*"
                   {...register(`vehiculos.${index}.valorComercial`, {
                     setValueAs: (v) => {
                       const cleaned = String(v || '').replace(/[^0-9]/g, '')
                       return cleaned === '' ? 0 : parseInt(cleaned, 10)
                     },
                   })}
-                  onInput={(e) => {
-                    const input = e.target as HTMLInputElement
-                    input.value = input.value.replace(/[^0-9]/g, '')
+                  onKeyDown={(e) => {
+                    if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                      e.preventDefault()
+                    }
                   }}
                   placeholder="0"
                   className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white"
@@ -420,27 +426,33 @@ export function FormStep8New() {
     setValue('calculated.patrimonio', patrimonio)
   }, [totalActivosCorrientes, totalActivosFijos, totalActivos, totalPasivoCorriente, totalPasivoLargoPlazo, totalPasivos, patrimonio, setValue])
 
-  const MoneyInput = ({ name, label }: { name: string; label: string }) => (
-    <div>
-      <label className="block text-xs mb-1">{label}</label>
-      <input
-        type="text"
-        inputMode="numeric"
-        {...register(name, {
-          setValueAs: (v) => {
-            const cleaned = String(v || '').replace(/[^0-9]/g, '')
-            return cleaned === '' ? 0 : parseInt(cleaned, 10)
-          },
-        })}
-        onInput={(e) => {
-          const input = e.target as HTMLInputElement
-          input.value = input.value.replace(/[^0-9]/g, '')
-        }}
-        placeholder="0"
-        className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white text-sm text-right"
-      />
-    </div>
-  )
+  const MoneyInput = ({ name, label }: { name: string; label: string }) => {
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+        e.preventDefault()
+      }
+    }
+
+    return (
+      <div>
+        <label className="block text-xs mb-1">{label}</label>
+        <input
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          {...register(name, {
+            setValueAs: (v) => {
+              const cleaned = String(v || '').replace(/[^0-9]/g, '')
+              return cleaned === '' ? 0 : parseInt(cleaned, 10)
+            },
+          })}
+          onKeyDown={handleKeyPress}
+          placeholder="0"
+          className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white text-sm text-right"
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -644,29 +656,35 @@ export function FormStep9New() {
     setValue('calculated.totalGastosFamiliares', totalGastosFamiliares)
   }, [totalIngresosTitular, totalIngresosConyuge, totalIngresosFamiliares, totalGastosFamiliares, setValue])
 
-  const MoneyInput = ({ name, label, required = false }: { name: string; label: string; required?: boolean }) => (
-    <div>
-      <label className="block text-sm font-medium mb-1">
-        {label} {required && <span className="text-red-400">*</span>}
-      </label>
-      <input
-        type="text"
-        inputMode="numeric"
-        {...register(name, {
-          setValueAs: (v) => {
-            const cleaned = String(v || '').replace(/[^0-9]/g, '')
-            return cleaned === '' ? 0 : parseInt(cleaned, 10)
-          },
-        })}
-        onInput={(e) => {
-          const input = e.target as HTMLInputElement
-          input.value = input.value.replace(/[^0-9]/g, '')
-        }}
-        placeholder="0"
-        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-right"
-      />
-    </div>
-  )
+  const MoneyInput = ({ name, label, required = false }: { name: string; label: string; required?: boolean }) => {
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+        e.preventDefault()
+      }
+    }
+
+    return (
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          {label} {required && <span className="text-red-400">*</span>}
+        </label>
+        <input
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          {...register(name, {
+            setValueAs: (v) => {
+              const cleaned = String(v || '').replace(/[^0-9]/g, '')
+              return cleaned === '' ? 0 : parseInt(cleaned, 10)
+            },
+          })}
+          onKeyDown={handleKeyPress}
+          placeholder="0"
+          className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-right"
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -828,15 +846,17 @@ export function FormStep10New() {
             id="obligacionesFinancieras"
             type="text"
             inputMode="numeric"
+            pattern="[0-9]*"
             {...register('obligacionesFinancieras', {
               setValueAs: (v) => {
                 const cleaned = String(v || '').replace(/[^0-9]/g, '')
                 return cleaned === '' ? 0 : parseInt(cleaned, 10)
               },
             })}
-            onInput={(e) => {
-              const input = e.target as HTMLInputElement
-              input.value = input.value.replace(/[^0-9]/g, '')
+            onKeyDown={(e) => {
+              if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                e.preventDefault()
+              }
             }}
             placeholder="0"
             className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-right"

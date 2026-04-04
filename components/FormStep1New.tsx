@@ -78,6 +78,7 @@ export function FormStep1New() {
             id="valorSolicitado"
             type="text"
             inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="5000000"
             {...register('valorSolicitado', {
               setValueAs: (v) => {
@@ -85,9 +86,10 @@ export function FormStep1New() {
                 return cleaned === '' ? 0 : parseInt(cleaned, 10)
               },
             })}
-            onInput={(e) => {
-              const input = e.target as HTMLInputElement
-              input.value = input.value.replace(/[^0-9]/g, '')
+            onKeyDown={(e) => {
+              if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                e.preventDefault()
+              }
             }}
             className={`pl-8 ${errors.valorSolicitado ? 'border-red-500' : ''}`}
           />
@@ -128,6 +130,7 @@ export function FormStep1New() {
             <input
               type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="Ingrese número de cuotas (3-60)"
               {...register('numeroCuotasCustom', {
                 setValueAs: (v) => {
@@ -135,9 +138,10 @@ export function FormStep1New() {
                   return cleaned === '' ? 0 : parseInt(cleaned, 10)
                 },
               })}
-              onInput={(e) => {
-                const input = e.target as HTMLInputElement
-                input.value = input.value.replace(/[^0-9]/g, '')
+              onKeyDown={(e) => {
+                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                  e.preventDefault()
+                }
               }}
               className="w-full"
             />
@@ -190,6 +194,7 @@ export function FormStep1New() {
             id="diaPagoCuota"
             type="text"
             inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="15"
             {...register('diaPagoCuota', {
               setValueAs: (v) => {
@@ -197,9 +202,10 @@ export function FormStep1New() {
                 return cleaned === '' ? 0 : parseInt(cleaned, 10)
               },
             })}
-            onInput={(e) => {
-              const input = e.target as HTMLInputElement
-              input.value = input.value.replace(/[^0-9]/g, '')
+            onKeyDown={(e) => {
+              if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                e.preventDefault()
+              }
             }}
             className={`w-32 ${errors.diaPagoCuota ? 'border-red-500' : ''}`}
           />

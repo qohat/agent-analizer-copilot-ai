@@ -72,6 +72,7 @@ export function FormStep5New() {
               id="numeroEmpleados"
               type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="0"
               {...register('numeroEmpleados', {
                 setValueAs: (v) => {
@@ -79,9 +80,10 @@ export function FormStep5New() {
                   return cleaned === '' ? 0 : parseInt(cleaned, 10)
                 },
               })}
-              onInput={(e) => {
-                const input = e.target as HTMLInputElement
-                input.value = input.value.replace(/[^0-9]/g, '')
+              onKeyDown={(e) => {
+                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                  e.preventDefault()
+                }
               }}
               className={errors.numeroEmpleados ? 'border-red-500' : ''}
             />
@@ -98,6 +100,7 @@ export function FormStep5New() {
               id="anosOperacion"
               type="text"
               inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="0"
               {...register('anosOperacion', {
                 setValueAs: (v) => {
@@ -105,9 +108,10 @@ export function FormStep5New() {
                   return cleaned === '' ? 0 : parseInt(cleaned, 10)
                 },
               })}
-              onInput={(e) => {
-                const input = e.target as HTMLInputElement
-                input.value = input.value.replace(/[^0-9]/g, '')
+              onKeyDown={(e) => {
+                if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+                  e.preventDefault()
+                }
               }}
               className={errors.anosOperacion ? 'border-red-500' : ''}
             />
