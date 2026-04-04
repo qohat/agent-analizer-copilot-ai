@@ -84,10 +84,10 @@ describe('FormStep8New - Balance General', () => {
 
       const inputs = screen.getAllByPlaceholderText(/\(negocio\)/i)
 
-      fireEvent.change(inputs[0], { target: { value: '123456' } })
+      fireEvent.input(inputs[0], { target: { value: '123456' } })
 
       await waitFor(() => {
-        expect(inputs[0]).toHaveValue(123456)
+        expect(inputs[0]).toHaveValue('123456')
       })
     })
   })
@@ -100,11 +100,12 @@ describe('FormStep8New - Balance General', () => {
       expect(screen.getAllByRole('heading', { level: 3 }).length).toBeGreaterThan(0)
     })
 
-    it('should have type="number" for all inputs', () => {
+    it('should have type="text" with numeric input for all money inputs', () => {
       render(<FormStep8Wrapper />)
 
       const cajaNegocio = screen.getByPlaceholderText(/Caja \(negocio\)/i)
-      expect(cajaNegocio).toHaveAttribute('type', 'number')
+      expect(cajaNegocio).toHaveAttribute('type', 'text')
+      expect(cajaNegocio).toHaveAttribute('inputmode', 'numeric')
     })
   })
 })

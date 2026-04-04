@@ -204,7 +204,22 @@ export function FormStep7New() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Avalúo comercial ($)</label>
-                <input type="number" {...register(`bienesRaices.${index}.avaluoComercial`, { valueAsNumber: true })} placeholder="0" className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white" />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  {...register(`bienesRaices.${index}.avaluoComercial`, {
+                    setValueAs: (v) => {
+                      const cleaned = String(v || '').replace(/[^0-9]/g, '')
+                      return cleaned === '' ? 0 : parseInt(cleaned, 10)
+                    },
+                  })}
+                  onInput={(e) => {
+                    const input = e.target as HTMLInputElement
+                    input.value = input.value.replace(/[^0-9]/g, '')
+                  }}
+                  placeholder="0"
+                  className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Matrícula inmobiliaria</label>
@@ -269,7 +284,22 @@ export function FormStep7New() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Modelo (año)</label>
-                <input type="number" {...register(`vehiculos.${index}.modelo`, { valueAsNumber: true })} placeholder="2020" min="1980" className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white" />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  {...register(`vehiculos.${index}.modelo`, {
+                    setValueAs: (v) => {
+                      const cleaned = String(v || '').replace(/[^0-9]/g, '')
+                      return cleaned === '' ? 0 : parseInt(cleaned, 10)
+                    },
+                  })}
+                  onInput={(e) => {
+                    const input = e.target as HTMLInputElement
+                    input.value = input.value.replace(/[^0-9]/g, '')
+                  }}
+                  placeholder="2020"
+                  className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Placa</label>
@@ -277,7 +307,22 @@ export function FormStep7New() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Valor comercial ($)</label>
-                <input type="number" {...register(`vehiculos.${index}.valorComercial`, { valueAsNumber: true })} placeholder="0" className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white" />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  {...register(`vehiculos.${index}.valorComercial`, {
+                    setValueAs: (v) => {
+                      const cleaned = String(v || '').replace(/[^0-9]/g, '')
+                      return cleaned === '' ? 0 : parseInt(cleaned, 10)
+                    },
+                  })}
+                  onInput={(e) => {
+                    const input = e.target as HTMLInputElement
+                    input.value = input.value.replace(/[^0-9]/g, '')
+                  }}
+                  placeholder="0"
+                  className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white"
+                />
               </div>
             </div>
           </div>
@@ -379,8 +424,18 @@ export function FormStep8New() {
     <div>
       <label className="block text-xs mb-1">{label}</label>
       <input
-        type="number"
-        {...register(name, { valueAsNumber: true })}
+        type="text"
+        inputMode="numeric"
+        {...register(name, {
+          setValueAs: (v) => {
+            const cleaned = String(v || '').replace(/[^0-9]/g, '')
+            return cleaned === '' ? 0 : parseInt(cleaned, 10)
+          },
+        })}
+        onInput={(e) => {
+          const input = e.target as HTMLInputElement
+          input.value = input.value.replace(/[^0-9]/g, '')
+        }}
         placeholder="0"
         className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white text-sm text-right"
       />
@@ -595,8 +650,18 @@ export function FormStep9New() {
         {label} {required && <span className="text-red-400">*</span>}
       </label>
       <input
-        type="number"
-        {...register(name, { valueAsNumber: true })}
+        type="text"
+        inputMode="numeric"
+        {...register(name, {
+          setValueAs: (v) => {
+            const cleaned = String(v || '').replace(/[^0-9]/g, '')
+            return cleaned === '' ? 0 : parseInt(cleaned, 10)
+          },
+        })}
+        onInput={(e) => {
+          const input = e.target as HTMLInputElement
+          input.value = input.value.replace(/[^0-9]/g, '')
+        }}
         placeholder="0"
         className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-right"
       />
@@ -761,8 +826,18 @@ export function FormStep10New() {
           </label>
           <input
             id="obligacionesFinancieras"
-            type="number"
-            {...register('obligacionesFinancieras', { valueAsNumber: true })}
+            type="text"
+            inputMode="numeric"
+            {...register('obligacionesFinancieras', {
+              setValueAs: (v) => {
+                const cleaned = String(v || '').replace(/[^0-9]/g, '')
+                return cleaned === '' ? 0 : parseInt(cleaned, 10)
+              },
+            })}
+            onInput={(e) => {
+              const input = e.target as HTMLInputElement
+              input.value = input.value.replace(/[^0-9]/g, '')
+            }}
             placeholder="0"
             className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-right"
           />

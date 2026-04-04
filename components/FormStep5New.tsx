@@ -70,9 +70,19 @@ export function FormStep5New() {
             </label>
             <input
               id="numeroEmpleados"
-              type="number"
+              type="text"
+              inputMode="numeric"
               placeholder="0"
-              {...register('numeroEmpleados', { valueAsNumber: true })}
+              {...register('numeroEmpleados', {
+                setValueAs: (v) => {
+                  const cleaned = String(v || '').replace(/[^0-9]/g, '')
+                  return cleaned === '' ? 0 : parseInt(cleaned, 10)
+                },
+              })}
+              onInput={(e) => {
+                const input = e.target as HTMLInputElement
+                input.value = input.value.replace(/[^0-9]/g, '')
+              }}
               className={errors.numeroEmpleados ? 'border-red-500' : ''}
             />
             {errors.numeroEmpleados && (
@@ -86,10 +96,19 @@ export function FormStep5New() {
             </label>
             <input
               id="anosOperacion"
-              type="number"
-              step="0.5"
+              type="text"
+              inputMode="numeric"
               placeholder="0"
-              {...register('anosOperacion', { valueAsNumber: true })}
+              {...register('anosOperacion', {
+                setValueAs: (v) => {
+                  const cleaned = String(v || '').replace(/[^0-9]/g, '')
+                  return cleaned === '' ? 0 : parseInt(cleaned, 10)
+                },
+              })}
+              onInput={(e) => {
+                const input = e.target as HTMLInputElement
+                input.value = input.value.replace(/[^0-9]/g, '')
+              }}
               className={errors.anosOperacion ? 'border-red-500' : ''}
             />
             {errors.anosOperacion && (

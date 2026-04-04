@@ -76,9 +76,19 @@ export function FormStep1New() {
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">$</span>
           <input
             id="valorSolicitado"
-            type="number"
+            type="text"
+            inputMode="numeric"
             placeholder="5000000"
-            {...register('valorSolicitado', { valueAsNumber: true })}
+            {...register('valorSolicitado', {
+              setValueAs: (v) => {
+                const cleaned = String(v || '').replace(/[^0-9]/g, '')
+                return cleaned === '' ? 0 : parseInt(cleaned, 10)
+              },
+            })}
+            onInput={(e) => {
+              const input = e.target as HTMLInputElement
+              input.value = input.value.replace(/[^0-9]/g, '')
+            }}
             className={`pl-8 ${errors.valorSolicitado ? 'border-red-500' : ''}`}
           />
         </div>
@@ -116,11 +126,19 @@ export function FormStep1New() {
         {watch('numeroCuotas') === 'custom' && (
           <div className="mt-2">
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               placeholder="Ingrese número de cuotas (3-60)"
-              {...register('numeroCuotasCustom', { valueAsNumber: true })}
-              min="3"
-              max="60"
+              {...register('numeroCuotasCustom', {
+                setValueAs: (v) => {
+                  const cleaned = String(v || '').replace(/[^0-9]/g, '')
+                  return cleaned === '' ? 0 : parseInt(cleaned, 10)
+                },
+              })}
+              onInput={(e) => {
+                const input = e.target as HTMLInputElement
+                input.value = input.value.replace(/[^0-9]/g, '')
+              }}
               className="w-full"
             />
           </div>
@@ -170,11 +188,19 @@ export function FormStep1New() {
           </label>
           <input
             id="diaPagoCuota"
-            type="number"
+            type="text"
+            inputMode="numeric"
             placeholder="15"
-            min="1"
-            max="30"
-            {...register('diaPagoCuota', { valueAsNumber: true })}
+            {...register('diaPagoCuota', {
+              setValueAs: (v) => {
+                const cleaned = String(v || '').replace(/[^0-9]/g, '')
+                return cleaned === '' ? 0 : parseInt(cleaned, 10)
+              },
+            })}
+            onInput={(e) => {
+              const input = e.target as HTMLInputElement
+              input.value = input.value.replace(/[^0-9]/g, '')
+            }}
             className={`w-32 ${errors.diaPagoCuota ? 'border-red-500' : ''}`}
           />
           {errors.diaPagoCuota && (

@@ -160,9 +160,19 @@ export function FormStep4New() {
               </label>
               <input
                 id="valorArrendado"
-                type="number"
+                type="text"
+                inputMode="numeric"
                 placeholder="500000"
-                {...register('valorArrendado', { valueAsNumber: true })}
+                {...register('valorArrendado', {
+                  setValueAs: (v) => {
+                    const cleaned = String(v || '').replace(/[^0-9]/g, '')
+                    return cleaned === '' ? 0 : parseInt(cleaned, 10)
+                  },
+                })}
+                onInput={(e) => {
+                  const input = e.target as HTMLInputElement
+                  input.value = input.value.replace(/[^0-9]/g, '')
+                }}
                 className={errors.valorArrendado ? 'border-red-500' : ''}
               />
               {errors.valorArrendado && (

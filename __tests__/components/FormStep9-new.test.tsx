@@ -112,11 +112,12 @@ describe('FormStep9New - Ingresos y Gastos', () => {
       expect(screen.getAllByRole('heading', { level: 3 }).length).toBeGreaterThanOrEqual(2)
     })
 
-    it('should have all inputs with type="number"', () => {
+    it('should have all inputs with type="text" and numeric inputmode', () => {
       render(<FormStep9Wrapper />)
 
       const ingresosInput = screen.getByLabelText(/Ingresos mensuales/i)
-      expect(ingresosInput).toHaveAttribute('type', 'number')
+      expect(ingresosInput).toHaveAttribute('type', 'text')
+      expect(ingresosInput).toHaveAttribute('inputmode', 'numeric')
     })
   })
 

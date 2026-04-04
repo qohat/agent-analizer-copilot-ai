@@ -53,8 +53,18 @@ function FormStep1Mock() {
         <label htmlFor="valorSolicitado">Monto solicitado ($)</label>
         <input
           id="valorSolicitado"
-          type="number"
-          {...register('valorSolicitado', { valueAsNumber: true })}
+          type="text"
+          inputMode="numeric"
+          {...register('valorSolicitado', {
+            setValueAs: (v) => {
+              const cleaned = String(v || '').replace(/[^0-9]/g, '')
+              return cleaned === '' ? 0 : parseInt(cleaned, 10)
+            },
+          })}
+          onInput={(e) => {
+            const input = e.target as HTMLInputElement
+            input.value = input.value.replace(/[^0-9]/g, '')
+          }}
           data-testid="valorSolicitado"
         />
         {errors.valorSolicitado && (
@@ -67,8 +77,18 @@ function FormStep1Mock() {
         <label htmlFor="numeroCuotas">Número de cuotas</label>
         <input
           id="numeroCuotas"
-          type="number"
-          {...register('numeroCuotas', { valueAsNumber: true })}
+          type="text"
+          inputMode="numeric"
+          {...register('numeroCuotas', {
+            setValueAs: (v) => {
+              const cleaned = String(v || '').replace(/[^0-9]/g, '')
+              return cleaned === '' ? 0 : parseInt(cleaned, 10)
+            },
+          })}
+          onInput={(e) => {
+            const input = e.target as HTMLInputElement
+            input.value = input.value.replace(/[^0-9]/g, '')
+          }}
           data-testid="numeroCuotas"
         />
         {errors.numeroCuotas && (
@@ -113,8 +133,18 @@ function FormStep1Mock() {
         <label htmlFor="diaPagoCuota">Día de pago preferido (opcional)</label>
         <input
           id="diaPagoCuota"
-          type="number"
-          {...register('diaPagoCuota', { valueAsNumber: true })}
+          type="text"
+          inputMode="numeric"
+          {...register('diaPagoCuota', {
+            setValueAs: (v) => {
+              const cleaned = String(v || '').replace(/[^0-9]/g, '')
+              return cleaned === '' ? 0 : parseInt(cleaned, 10)
+            },
+          })}
+          onInput={(e) => {
+            const input = e.target as HTMLInputElement
+            input.value = input.value.replace(/[^0-9]/g, '')
+          }}
           data-testid="diaPagoCuota"
         />
         {errors.diaPagoCuota && (
@@ -165,8 +195,8 @@ describe('FormStep1 (New) - Datos de la Solicitud', () => {
       const frecuenciaSelect = screen.getByTestId('frecuencia')
       const destinoTextarea = screen.getByTestId('destino')
 
-      expect(valorInput).toHaveAttribute('type', 'number')
-      expect(cuotasInput).toHaveAttribute('type', 'number')
+      expect(valorInput).toHaveAttribute('type', 'text')
+      expect(valorInput).toHaveAttribute('inputmode', 'numeric')
       expect(frecuenciaSelect.tagName).toBe('SELECT')
       expect(destinoTextarea.tagName).toBe('TEXTAREA')
     })
@@ -185,14 +215,14 @@ describe('FormStep1 (New) - Datos de la Solicitud', () => {
       const frecuenciaSelect = screen.getByTestId('frecuencia')
       const destinoTextarea = screen.getByTestId('destino')
 
-      fireEvent.change(valorInput, { target: { value: '5000000' } })
-      fireEvent.change(cuotasInput, { target: { value: '12' } })
+      fireEvent.input(valorInput, { target: { value: '5000000' } })
+      fireEvent.input(cuotasInput, { target: { value: '12' } })
       fireEvent.change(frecuenciaSelect, { target: { value: 'mensual' } })
       fireEvent.change(destinoTextarea, { target: { value: 'Capital de trabajo para el negocio' } })
 
       await waitFor(() => {
-        expect(valorInput).toHaveValue(5000000)
-        expect(cuotasInput).toHaveValue(12)
+        expect(valorInput).toHaveValue('5000000')
+        expect(cuotasInput).toHaveValue('12')
         expect(frecuenciaSelect).toHaveValue('mensual')
         expect(destinoTextarea).toHaveValue('Capital de trabajo para el negocio')
       })
@@ -207,10 +237,10 @@ describe('FormStep1 (New) - Datos de la Solicitud', () => {
 
       const diaPagoInput = screen.getByTestId('diaPagoCuota')
 
-      fireEvent.change(diaPagoInput, { target: { value: '15' } })
+      fireEvent.input(diaPagoInput, { target: { value: '15' } })
 
       await waitFor(() => {
-        expect(diaPagoInput).toHaveValue(15)
+        expect(diaPagoInput).toHaveValue('15')
       })
     })
   })

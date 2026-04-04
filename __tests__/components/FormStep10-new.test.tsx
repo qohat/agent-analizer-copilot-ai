@@ -98,11 +98,12 @@ describe('FormStep10New - Capacidad de Pago', () => {
       expect(screen.getByRole('heading', { level: 3 })).toBeInTheDocument()
     })
 
-    it('should have type="number" input', () => {
+    it('should have type="text" with numeric inputmode', () => {
       render(<FormStep10Wrapper />)
 
       const obligacionesInput = screen.getByLabelText(/Obligaciones financieras actuales/i)
-      expect(obligacionesInput).toHaveAttribute('type', 'number')
+      expect(obligacionesInput).toHaveAttribute('type', 'text')
+      expect(obligacionesInput).toHaveAttribute('inputmode', 'numeric')
     })
 
     it('should have placeholder', () => {
