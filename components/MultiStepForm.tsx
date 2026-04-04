@@ -33,6 +33,8 @@ import { ChevronLeft, ChevronRight, Loader2, CheckCircle2 } from 'lucide-react'
 
 const TOTAL_STEPS = 11
 
+const STORAGE_KEY = 'credit-application-draft'
+
 export function MultiStepForm() {
   const [step, setStep] = useState(1)
   const [submitted, setSubmitted] = useState(false)
@@ -54,25 +56,64 @@ export function MultiStepForm() {
 
   const methods = useForm({
     resolver: zodResolver(schemas[step - 1]),
-    mode: 'onChange',  // Real-time validation for better UX
-    reValidateMode: 'onChange',
+    mode: 'onBlur',  // Validate on blur instead of onChange
+    reValidateMode: 'onBlur',
     shouldUnregister: false,
+    defaultValues: {
+      bienesRaices: [],
+      vehiculos: [],
+    },
   })
+
+  // Load data from localStorage on mount
+  React.useEffect(() => {
+    const savedData = localStorage.getItem(STORAGE_KEY)
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData)
+        methods.reset(parsed.formData)
+        setStep(parsed.currentStep || 1)
+      } catch (error) {
+        console.error('Error loading saved data:', error)
+      }
+    }
+  }, [methods])
+
+  // Save data to localStorage whenever form changes
+  React.useEffect(() => {
+    const subscription = methods.watch((formData) => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          formData,
+          currentStep: step,
+          lastSaved: new Date().toISOString(),
+        }))
+      } catch (error) {
+        console.error('Error saving data:', error)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [methods, step])
 
   // Update resolver when step changes
   React.useEffect(() => {
     methods.clearErrors()
   }, [step, methods])
 
-  // Check if current step has validation errors
-  const hasErrors = Object.keys(methods.formState.errors).length > 0
-
   const onNextStep = async () => {
     // Trigger validation to show all errors
     const stepIsValid = await methods.trigger()
+
     if (stepIsValid && step < TOTAL_STEPS) {
       setStep(step + 1)
       window.scrollTo({ top: 0, behavior: 'smooth' })
+    } else if (!stepIsValid) {
+      // Scroll to first error
+      const firstError = Object.keys(methods.formState.errors)[0]
+      if (firstError) {
+        const element = document.getElementsByName(firstError)[0]
+        element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
     }
   }
 
@@ -177,9 +218,8 @@ export function MultiStepForm() {
             <button
               type="button"
               onClick={onNextStep}
-              disabled={loading || hasErrors}
+              disabled={loading}
               className="flex-1 px-6 py-3 bg-emerald-500 text-slate-950 font-semibold rounded-lg hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
-              title={hasErrors ? 'Complete todos los campos requeridos correctamente' : 'Continuar al siguiente paso'}
             >
               Siguiente
               <ChevronRight className="w-4 h-4" />

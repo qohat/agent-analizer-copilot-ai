@@ -8,20 +8,20 @@ import { z } from 'zod'
 // Step 6: Cónyuge (condicional)
 export const step6ConyugeSchema = z.object({
   conyugeFirma: z.boolean().optional(),
-  tipoDocumento: z.enum(['CC', 'CE', 'PP']).optional(),
-  identificacion: z.string().regex(/^[0-9]{6,10}$/).optional(),
-  primerApellido: z.string().min(2).optional(),
-  segundoApellido: z.string().min(2).optional(),
-  primerNombre: z.string().min(2).optional(),
-  segundoNombre: z.string().min(2).optional(),
-  fechaNacimiento: z.string().optional(), // format: date
-  ocupacion: z.string().optional(),
-  nacionalidad: z.string().optional(),
-  telefonoFijo: z.string().regex(/^[0-9]{7,10}$/).optional(),
-  celular: z.string().regex(/^3[0-9]{9}$/).optional(),
-  genero: z.enum(['masculino', 'femenino', 'otro']).optional(),
-  fechaExpedicion: z.string().optional(), // format: date
-  lugarExpedicion: z.string().optional(),
+  tipoDocumento: z.enum(['CC', 'CE', 'PP']).or(z.literal('')).optional(),
+  identificacion: z.string().regex(/^[0-9]{6,10}$/).or(z.literal('')).optional(),
+  primerApellido: z.string().min(2).or(z.literal('')).optional(),
+  segundoApellido: z.string().min(2).or(z.literal('')).optional(),
+  primerNombre: z.string().min(2).or(z.literal('')).optional(),
+  segundoNombre: z.string().min(2).or(z.literal('')).optional(),
+  fechaNacimiento: z.string().or(z.literal('')).optional(), // format: date
+  ocupacion: z.string().or(z.literal('')).optional(),
+  nacionalidad: z.string().or(z.literal('')).optional(),
+  telefonoFijo: z.string().regex(/^[0-9]{7,10}$/).or(z.literal('')).optional(),
+  celular: z.string().regex(/^3[0-9]{9}$/).or(z.literal('')).optional(),
+  genero: z.enum(['masculino', 'femenino', 'otro']).or(z.literal('')).optional(),
+  fechaExpedicion: z.string().or(z.literal('')).optional(), // format: date
+  lugarExpedicion: z.string().or(z.literal('')).optional(),
 }).optional()
 
 // Step 7: Bienes y Referencias
@@ -33,16 +33,16 @@ const referenciaSchema = z.object({
 
 const bienRaizSchema = z.object({
   tipoInmueble: z.enum(['casa', 'apartamento', 'lote', 'finca']),
-  numeroDocumento: z.string().optional(), // Matrícula inmobiliaria
-  fechaDocumento: z.string().optional(), // format: date
+  numeroDocumento: z.string().or(z.literal('')).optional(), // Matrícula inmobiliaria
+  fechaDocumento: z.string().or(z.literal('')).optional(), // format: date
   avaluoComercial: z.number().min(0),
-  ciudad: z.string().optional(),
+  ciudad: z.string().or(z.literal('')).optional(),
 })
 
 const vehiculoSchema = z.object({
   clase: z.enum(['auto', 'moto', 'camion']),
   modelo: z.number().int().min(1980),
-  placa: z.string().regex(/^[A-Z]{3}[0-9]{3}$/).optional(),
+  placa: z.string().regex(/^[A-Z]{3}[0-9]{3}$/).or(z.literal('')).optional(),
   valorComercial: z.number().min(0),
 })
 
