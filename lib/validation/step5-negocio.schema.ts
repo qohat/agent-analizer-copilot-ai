@@ -19,7 +19,7 @@ export const step5NegocioSchema = z.object({
   barrioVeredaNegocio: z.string().max(100).or(z.literal('')).optional(),
 
   numeroEmpleados: z
-    .number()
+    .coerce.number()
     .int('Debe ser un número entero')
     .min(0, 'No puede ser negativo')
     .max(500, 'Máximo 500 empleados'),
@@ -29,7 +29,7 @@ export const step5NegocioSchema = z.object({
     .regex(/^3[0-9]{9}$/, 'Debe ser un celular colombiano válido (10 dígitos)'),
 
   anosOperacion: z
-    .number()
+    .coerce.number()
     .min(0, 'No puede ser negativo')
     .max(100, 'Máximo 100 años'),
 

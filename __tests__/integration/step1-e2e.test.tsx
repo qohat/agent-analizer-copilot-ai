@@ -28,7 +28,7 @@ describe('Step 1 E2E - Datos de la Solicitud', () => {
       const cuotasSelect = screen.getByLabelText(/plazo del crédito/i)
       const destinoTextarea = screen.getByLabelText(/destino del crédito/i)
 
-      fireEvent.change(valorInput, { target: { value: '5000000' } })
+      fireEvent.input(valorInput, { target: { value: '5000000' } })
       fireEvent.change(cuotasSelect, { target: { value: '12' } })
       fireEvent.change(destinoTextarea, {
         target: { value: 'Capital de trabajo para compra de inventario' }
@@ -40,7 +40,7 @@ describe('Step 1 E2E - Datos de la Solicitud', () => {
 
       // Wait for validation to complete
       await waitFor(() => {
-        expect(valorInput).toHaveValue(5000000)
+        expect(valorInput).toHaveValue('5000000')
       })
 
       // Verify simulador shows calculations
@@ -64,7 +64,7 @@ describe('Step 1 E2E - Datos de la Solicitud', () => {
 
       // Fill Step 1
       const valorInput = screen.getByLabelText(/monto del crédito solicitado/i)
-      fireEvent.change(valorInput, { target: { value: '15000000' } })
+      fireEvent.input(valorInput, { target: { value: '15000000' } })
 
       const cuotasSelect = screen.getByLabelText(/plazo del crédito/i)
       fireEvent.change(cuotasSelect, { target: { value: '24' } })
@@ -95,7 +95,7 @@ describe('Step 1 E2E - Datos de la Solicitud', () => {
 
       // Verify data persisted
       const persistedValor = screen.getByLabelText(/monto del crédito solicitado/i)
-      expect(persistedValor).toHaveValue(15000000)
+      expect(persistedValor).toHaveValue('15000000')
 
       const persistedDestino = screen.getByLabelText(/destino del crédito/i)
       expect(persistedDestino).toHaveValue('Expansión del negocio y compra de equipos')
@@ -105,7 +105,7 @@ describe('Step 1 E2E - Datos de la Solicitud', () => {
       render(<MultiStepForm />)
 
       // Fill required fields first
-      fireEvent.change(screen.getByLabelText(/monto del crédito solicitado/i), {
+      fireEvent.input(screen.getByLabelText(/monto del crédito solicitado/i), {
         target: { value: '10000000' }
       })
       fireEvent.change(screen.getByLabelText(/plazo del crédito/i), {
@@ -126,9 +126,9 @@ describe('Step 1 E2E - Datos de la Solicitud', () => {
 
       // Fill optional field
       const diaPagoInput = screen.getByLabelText(/día de pago preferido/i)
-      fireEvent.change(diaPagoInput, { target: { value: '15' } })
+      fireEvent.input(diaPagoInput, { target: { value: '15' } })
 
-      expect(diaPagoInput).toHaveValue(15)
+      expect(diaPagoInput).toHaveValue('15')
 
       // Should still be able to navigate
       const nextButton = screen.getByRole('button', { name: /siguiente/i })
@@ -166,7 +166,7 @@ describe('Step 1 E2E - Datos de la Solicitud', () => {
       render(<MultiStepForm />)
 
       const valorInput = screen.getByLabelText(/monto del crédito solicitado/i)
-      fireEvent.change(valorInput, { target: { value: '400000' } }) // Below 500k minimum
+      fireEvent.input(valorInput, { target: { value: '400000' } }) // Below 500k minimum
 
       const nextButton = screen.getByRole('button', { name: /siguiente/i })
       fireEvent.click(nextButton)
@@ -185,7 +185,7 @@ describe('Step 1 E2E - Datos de la Solicitud', () => {
       render(<MultiStepForm />)
 
       const valorInput = screen.getByLabelText(/monto del crédito solicitado/i)
-      fireEvent.change(valorInput, { target: { value: '5000000' } })
+      fireEvent.input(valorInput, { target: { value: '5000000' } })
 
       const cuotasSelect = screen.getByLabelText(/plazo del crédito/i)
       fireEvent.change(cuotasSelect, { target: { value: '2' } }) // Below minimum
@@ -206,7 +206,7 @@ describe('Step 1 E2E - Datos de la Solicitud', () => {
       render(<MultiStepForm />)
 
       const valorInput = screen.getByLabelText(/monto del crédito solicitado/i)
-      fireEvent.change(valorInput, { target: { value: '5000000' } })
+      fireEvent.input(valorInput, { target: { value: '5000000' } })
 
       const cuotasSelect = screen.getByLabelText(/plazo del crédito/i)
       fireEvent.change(cuotasSelect, { target: { value: '12' } })
@@ -238,7 +238,7 @@ describe('Step 1 E2E - Datos de la Solicitud', () => {
       const valorInput = screen.getByLabelText(/monto del crédito solicitado/i)
       const cuotasSelect = screen.getByLabelText(/plazo del crédito/i)
 
-      fireEvent.change(valorInput, { target: { value: '10000000' } })
+      fireEvent.input(valorInput, { target: { value: '10000000' } })
       fireEvent.change(cuotasSelect, { target: { value: '24' } })
 
       await waitFor(() => {

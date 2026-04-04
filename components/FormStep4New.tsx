@@ -164,12 +164,7 @@ export function FormStep4New() {
                 inputMode="numeric"
                 pattern="[0-9]*"
                 placeholder="500000"
-                {...register('valorArrendado', {
-                  setValueAs: (v) => {
-                    const cleaned = String(v || '').replace(/[^0-9]/g, '')
-                    return cleaned === '' ? 0 : parseInt(cleaned, 10)
-                  },
-                })}
+                {...register('valorArrendado')}
                 onKeyDown={(e) => {
                   if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
                     e.preventDefault()

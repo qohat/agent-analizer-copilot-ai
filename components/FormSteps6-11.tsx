@@ -10,7 +10,7 @@ import { Users, Package, Calculator, TrendingUp, Wallet, CheckCircle, Plus, Tras
 
 // Step 6: Cónyuge
 export function FormStep6New() {
-  const { register, formState: { errors } } = useFormContext()
+  const { register } = useFormContext()
 
   return (
     <div className="space-y-6">
@@ -207,18 +207,12 @@ export function FormStep7New() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  pattern="[0-9]*"
                   {...register(`bienesRaices.${index}.avaluoComercial`, {
                     setValueAs: (v) => {
-                      const cleaned = String(v || '').replace(/[^0-9]/g, '')
+                      const cleaned = String(v || '').replace(/[^0-9]/g, '').replace(/^0+/, '')
                       return cleaned === '' ? 0 : parseInt(cleaned, 10)
                     },
                   })}
-                  onKeyDown={(e) => {
-                    if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
-                      e.preventDefault()
-                    }
-                  }}
                   placeholder="0"
                   className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white"
                 />
@@ -289,18 +283,12 @@ export function FormStep7New() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  pattern="[0-9]*"
                   {...register(`vehiculos.${index}.modelo`, {
                     setValueAs: (v) => {
-                      const cleaned = String(v || '').replace(/[^0-9]/g, '')
+                      const cleaned = String(v || '').replace(/[^0-9]/g, '').replace(/^0+/, '')
                       return cleaned === '' ? 0 : parseInt(cleaned, 10)
                     },
                   })}
-                  onKeyDown={(e) => {
-                    if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
-                      e.preventDefault()
-                    }
-                  }}
                   placeholder="2020"
                   className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white"
                 />
@@ -314,18 +302,12 @@ export function FormStep7New() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  pattern="[0-9]*"
                   {...register(`vehiculos.${index}.valorComercial`, {
                     setValueAs: (v) => {
-                      const cleaned = String(v || '').replace(/[^0-9]/g, '')
+                      const cleaned = String(v || '').replace(/[^0-9]/g, '').replace(/^0+/, '')
                       return cleaned === '' ? 0 : parseInt(cleaned, 10)
                     },
                   })}
-                  onKeyDown={(e) => {
-                    if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
-                      e.preventDefault()
-                    }
-                  }}
                   placeholder="0"
                   className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white"
                 />
@@ -371,18 +353,66 @@ export function FormStep7New() {
   )
 }
 
+// MoneyInput component - OUTSIDE to prevent re-creation
+const MoneyInput = React.memo(({ name, label }: { name: string; label: string }) => {
+  const { setValue, getValues } = useFormContext()
+  const inputId = `input-${name.replace(/\./g, '-')}`
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value
+
+    // Remove all non-numeric characters
+    val = val.replace(/[^0-9]/g, '')
+
+    // Remove leading zeros
+    val = val.replace(/^0+/, '')
+
+    // Update the input value directly
+    if (inputRef.current) {
+      inputRef.current.value = val
+    }
+
+    // Save to form
+    setValue(name, val, { shouldValidate: false })
+  }
+
+  // Get initial value
+  const initialValue = getValues(name) || ''
+
+  return (
+    <div>
+      <label htmlFor={inputId} className="block text-xs mb-1">{label}</label>
+      <input
+        ref={inputRef}
+        id={inputId}
+        type="text"
+        inputMode="numeric"
+        defaultValue={initialValue}
+        onChange={handleChange}
+        placeholder="0"
+        className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white text-sm text-right"
+      />
+    </div>
+  )
+})
+
+MoneyInput.displayName = 'MoneyInput'
+
 // Step 8: Balance General
 export function FormStep8New() {
-  const { register, watch, setValue } = useFormContext()
+  const { watch, setValue } = useFormContext()
 
   // Watch all balance fields for calculations
   const activos = watch('activos') || {}
   const pasivos = watch('pasivos') || {}
 
-  // Helper to sum negocio + familiar
-  const sumMontos = (obj: any) => {
+  // Helper to sum negocio + familiar (convert strings to numbers)
+  const sumMontos = (obj: { negocio?: string | number; familiar?: string | number } | undefined) => {
     if (!obj) return 0
-    return (obj.negocio || 0) + (obj.familiar || 0)
+    const negocio = Number(obj.negocio) || 0
+    const familiar = Number(obj.familiar) || 0
+    return negocio + familiar
   }
 
   // Calculate totals
@@ -425,34 +455,6 @@ export function FormStep8New() {
     setValue('calculated.totalPasivos', totalPasivos)
     setValue('calculated.patrimonio', patrimonio)
   }, [totalActivosCorrientes, totalActivosFijos, totalActivos, totalPasivoCorriente, totalPasivoLargoPlazo, totalPasivos, patrimonio, setValue])
-
-  const MoneyInput = ({ name, label }: { name: string; label: string }) => {
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
-        e.preventDefault()
-      }
-    }
-
-    return (
-      <div>
-        <label className="block text-xs mb-1">{label}</label>
-        <input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          {...register(name, {
-            setValueAs: (v) => {
-              const cleaned = String(v || '').replace(/[^0-9]/g, '')
-              return cleaned === '' ? 0 : parseInt(cleaned, 10)
-            },
-          })}
-          onKeyDown={handleKeyPress}
-          placeholder="0"
-          className="w-full px-3 py-2 bg-slate-600 border border-slate-500 rounded text-white text-sm text-right"
-        />
-      </div>
-    )
-  }
 
   return (
     <div className="space-y-6">
@@ -625,22 +627,70 @@ export function FormStep8New() {
 }
 
 // Step 9: Ingresos y Gastos
+// MoneyInput for Step 9 - OUTSIDE to prevent re-creation
+const MoneyInputStep9 = React.memo(({ name, label, required = false }: { name: string; label: string; required?: boolean }) => {
+  const { setValue, getValues } = useFormContext()
+  const inputId = `input-${name.replace(/\./g, '-')}`
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value
+
+    // Remove all non-numeric characters
+    val = val.replace(/[^0-9]/g, '')
+
+    // Remove leading zeros
+    val = val.replace(/^0+/, '')
+
+    // Update the input value directly
+    if (inputRef.current) {
+      inputRef.current.value = val
+    }
+
+    // Save to form
+    setValue(name, val, { shouldValidate: false })
+  }
+
+  // Get initial value
+  const initialValue = getValues(name) || ''
+
+  return (
+    <div>
+      <label htmlFor={inputId} className="block text-sm font-medium mb-1">
+        {label} {required && <span className="text-red-400">*</span>}
+      </label>
+      <input
+        ref={inputRef}
+        id={inputId}
+        type="text"
+        inputMode="numeric"
+        defaultValue={initialValue}
+        onChange={handleChange}
+        placeholder="0"
+        className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-right"
+      />
+    </div>
+  )
+})
+
+MoneyInputStep9.displayName = 'MoneyInputStep9'
+
 export function FormStep9New() {
-  const { register, watch, setValue } = useFormContext()
+  const { watch, setValue } = useFormContext()
 
-  // Watch all income and expense fields
-  const ingresosMensualesTitular = watch('ingresos.ingresosMensualesTitular') || 0
-  const otrosIngresosTitular = watch('ingresos.otrosIngresosTitular') || 0
-  const ingresosConyuge = watch('ingresos.ingresosConyuge') || 0
-  const otrosIngresosConyuge = watch('ingresos.otrosIngresosConyuge') || 0
+  // Watch all income and expense fields - CONVERT TO NUMBERS
+  const ingresosMensualesTitular = Number(watch('ingresos.ingresosMensualesTitular')) || 0
+  const otrosIngresosTitular = Number(watch('ingresos.otrosIngresosTitular')) || 0
+  const ingresosConyuge = Number(watch('ingresos.ingresosConyuge')) || 0
+  const otrosIngresosConyuge = Number(watch('ingresos.otrosIngresosConyuge')) || 0
 
-  const alimentacion = watch('gastos.alimentacion') || 0
-  const arrendamiento = watch('gastos.arrendamiento') || 0
-  const serviciosPublicos = watch('gastos.serviciosPublicos') || 0
-  const educacion = watch('gastos.educacion') || 0
-  const transporte = watch('gastos.transporte') || 0
-  const salud = watch('gastos.salud') || 0
-  const otros = watch('gastos.otros') || 0
+  const alimentacion = Number(watch('gastos.alimentacion')) || 0
+  const arrendamiento = Number(watch('gastos.arrendamiento')) || 0
+  const serviciosPublicos = Number(watch('gastos.serviciosPublicos')) || 0
+  const educacion = Number(watch('gastos.educacion')) || 0
+  const transporte = Number(watch('gastos.transporte')) || 0
+  const salud = Number(watch('gastos.salud')) || 0
+  const otros = Number(watch('gastos.otros')) || 0
 
   // Calculate totals
   const totalIngresosTitular = ingresosMensualesTitular + otrosIngresosTitular
@@ -655,36 +705,6 @@ export function FormStep9New() {
     setValue('calculated.totalIngresosFamiliares', totalIngresosFamiliares)
     setValue('calculated.totalGastosFamiliares', totalGastosFamiliares)
   }, [totalIngresosTitular, totalIngresosConyuge, totalIngresosFamiliares, totalGastosFamiliares, setValue])
-
-  const MoneyInput = ({ name, label, required = false }: { name: string; label: string; required?: boolean }) => {
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
-        e.preventDefault()
-      }
-    }
-
-    return (
-      <div>
-        <label className="block text-sm font-medium mb-1">
-          {label} {required && <span className="text-red-400">*</span>}
-        </label>
-        <input
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          {...register(name, {
-            setValueAs: (v) => {
-              const cleaned = String(v || '').replace(/[^0-9]/g, '')
-              return cleaned === '' ? 0 : parseInt(cleaned, 10)
-            },
-          })}
-          onKeyDown={handleKeyPress}
-          placeholder="0"
-          className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-right"
-        />
-      </div>
-    )
-  }
 
   return (
     <div className="space-y-6">
@@ -706,8 +726,8 @@ export function FormStep9New() {
         <div className="space-y-3">
           <h4 className="font-medium text-sm">Titular</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <MoneyInput name="ingresos.ingresosMensualesTitular" label="Ingresos mensuales" required />
-            <MoneyInput name="ingresos.otrosIngresosTitular" label="Otros ingresos" />
+            <MoneyInputStep9 name="ingresos.ingresosMensualesTitular" label="Ingresos mensuales" required />
+            <MoneyInputStep9 name="ingresos.otrosIngresosTitular" label="Otros ingresos" />
           </div>
           <div className="text-right text-sm">
             <span className="text-slate-400">Subtotal titular:</span>{' '}
@@ -718,8 +738,8 @@ export function FormStep9New() {
         <div className="space-y-3">
           <h4 className="font-medium text-sm">Cónyuge (si aplica)</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <MoneyInput name="ingresos.ingresosConyuge" label="Ingresos mensuales cónyuge" />
-            <MoneyInput name="ingresos.otrosIngresosConyuge" label="Otros ingresos cónyuge" />
+            <MoneyInputStep9 name="ingresos.ingresosConyuge" label="Ingresos mensuales cónyuge" />
+            <MoneyInputStep9 name="ingresos.otrosIngresosConyuge" label="Otros ingresos cónyuge" />
           </div>
           <div className="text-right text-sm">
             <span className="text-slate-400">Subtotal cónyuge:</span>{' '}
@@ -741,13 +761,13 @@ export function FormStep9New() {
         </h3>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          <MoneyInput name="gastos.alimentacion" label="Alimentación" required />
-          <MoneyInput name="gastos.arrendamiento" label="Arrendamiento" />
-          <MoneyInput name="gastos.serviciosPublicos" label="Servicios públicos" required />
-          <MoneyInput name="gastos.educacion" label="Educación" />
-          <MoneyInput name="gastos.transporte" label="Transporte" required />
-          <MoneyInput name="gastos.salud" label="Salud" required />
-          <MoneyInput name="gastos.otros" label="Otros gastos" />
+          <MoneyInputStep9 name="gastos.alimentacion" label="Alimentación" required />
+          <MoneyInputStep9 name="gastos.arrendamiento" label="Arrendamiento" />
+          <MoneyInputStep9 name="gastos.serviciosPublicos" label="Servicios públicos" required />
+          <MoneyInputStep9 name="gastos.educacion" label="Educación" />
+          <MoneyInputStep9 name="gastos.transporte" label="Transporte" required />
+          <MoneyInputStep9 name="gastos.salud" label="Salud" required />
+          <MoneyInputStep9 name="gastos.otros" label="Otros gastos" />
         </div>
 
         <div className="pt-3 border-t border-red-500/30 flex justify-between items-center">
@@ -786,18 +806,19 @@ export function FormStep9New() {
 
 // Step 10: Capacidad de Pago
 export function FormStep10New() {
-  const { register, watch, setValue } = useFormContext()
+  const { watch, setValue, getValues } = useFormContext()
+  const inputRef = React.useRef<HTMLInputElement>(null)
 
-  // Watch necessary fields
-  const obligacionesFinancieras = watch('obligacionesFinancieras') || 0
+  // Watch necessary fields - CONVERT TO NUMBERS
+  const obligacionesFinancieras = Number(watch('obligacionesFinancieras')) || 0
 
   // Get data from Step 1 (loan request)
-  const valorSolicitado = watch('valorSolicitado') || 0
-  const numeroCuotas = watch('numeroCuotas') || 1
+  const valorSolicitado = Number(watch('valorSolicitado')) || 0
+  const numeroCuotas = Number(watch('numeroCuotas')) || 1
 
   // Get calculated totals from Step 9
-  const totalIngresosFamiliares = watch('calculated.totalIngresosFamiliares') || 0
-  const totalGastosFamiliares = watch('calculated.totalGastosFamiliares') || 0
+  const totalIngresosFamiliares = Number(watch('calculated.totalIngresosFamiliares')) || 0
+  const totalGastosFamiliares = Number(watch('calculated.totalGastosFamiliares')) || 0
 
   // Calculate cuota solicitada (using 2% monthly interest rate - typical for microcredit)
   const tasaMensual = 0.02
@@ -843,20 +864,23 @@ export function FormStep10New() {
             Obligaciones financieras actuales (mensual) <span className="text-slate-400">($)</span>
           </label>
           <input
+            ref={inputRef}
             id="obligacionesFinancieras"
             type="text"
             inputMode="numeric"
-            pattern="[0-9]*"
-            {...register('obligacionesFinancieras', {
-              setValueAs: (v) => {
-                const cleaned = String(v || '').replace(/[^0-9]/g, '')
-                return cleaned === '' ? 0 : parseInt(cleaned, 10)
-              },
-            })}
-            onKeyDown={(e) => {
-              if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
-                e.preventDefault()
+            defaultValue={getValues('obligacionesFinancieras') || ''}
+            onChange={(e) => {
+              let val = e.target.value
+              // Remove all non-numeric characters
+              val = val.replace(/[^0-9]/g, '')
+              // Remove leading zeros
+              val = val.replace(/^0+/, '')
+              // Update the input value directly
+              if (inputRef.current) {
+                inputRef.current.value = val
               }
+              // Save to form
+              setValue('obligacionesFinancieras', val, { shouldValidate: false })
             }}
             placeholder="0"
             className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white text-right"
@@ -995,9 +1019,7 @@ export function FormStep10New() {
 
 // Step 11: Resumen
 export function FormStep11New() {
-  const { register, formState: { errors }, watch } = useFormContext()
-
-  const confirmacion = watch('confirmacion')
+  const { register, formState: { errors } } = useFormContext()
 
   return (
     <div className="space-y-6">

@@ -80,12 +80,7 @@ export function FormStep1New() {
             inputMode="numeric"
             pattern="[0-9]*"
             placeholder="5000000"
-            {...register('valorSolicitado', {
-              setValueAs: (v) => {
-                const cleaned = String(v || '').replace(/[^0-9]/g, '')
-                return cleaned === '' ? 0 : parseInt(cleaned, 10)
-              },
-            })}
+            {...register('valorSolicitado')}
             onKeyDown={(e) => {
               if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
                 e.preventDefault()
@@ -132,12 +127,7 @@ export function FormStep1New() {
               inputMode="numeric"
               pattern="[0-9]*"
               placeholder="Ingrese número de cuotas (3-60)"
-              {...register('numeroCuotasCustom', {
-                setValueAs: (v) => {
-                  const cleaned = String(v || '').replace(/[^0-9]/g, '')
-                  return cleaned === '' ? 0 : parseInt(cleaned, 10)
-                },
-              })}
+              {...register('numeroCuotasCustom')}
               onKeyDown={(e) => {
                 if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
                   e.preventDefault()
@@ -196,12 +186,7 @@ export function FormStep1New() {
             inputMode="numeric"
             pattern="[0-9]*"
             placeholder="15"
-            {...register('diaPagoCuota', {
-              setValueAs: (v) => {
-                const cleaned = String(v || '').replace(/[^0-9]/g, '')
-                return cleaned === '' ? 0 : parseInt(cleaned, 10)
-              },
-            })}
+            {...register('diaPagoCuota')}
             onKeyDown={(e) => {
               if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
                 e.preventDefault()

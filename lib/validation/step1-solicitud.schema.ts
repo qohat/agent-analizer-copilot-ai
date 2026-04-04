@@ -17,13 +17,13 @@ import { z } from 'zod'
 
 export const step1SolicitudSchema = z.object({
   // Valor solicitado en pesos colombianos
-  valorSolicitado: z.number()
+  valorSolicitado: z.coerce.number()
     .min(500000, 'El valor mínimo es $500,000')
     .max(50000000, 'El valor máximo es $50,000,000')
     .describe('Monto del crédito solicitado en COP'),
 
   // Número de cuotas
-  numeroCuotas: z.number()
+  numeroCuotas: z.coerce.number()
     .int('Debe ser un número entero')
     .min(3, 'Mínimo 3 cuotas')
     .max(60, 'Máximo 60 cuotas')
@@ -41,7 +41,7 @@ export const step1SolicitudSchema = z.object({
     .describe('Propósito del crédito solicitado'),
 
   // Día de pago de la cuota (opcional)
-  diaPagoCuota: z.number()
+  diaPagoCuota: z.coerce.number()
     .int()
     .min(1, 'El día debe estar entre 1 y 30')
     .max(30, 'El día debe estar entre 1 y 30')

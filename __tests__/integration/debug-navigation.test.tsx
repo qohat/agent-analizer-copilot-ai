@@ -20,7 +20,7 @@ describe('Debug Navigation', () => {
     const destinoTextarea = screen.getByLabelText(/destino del crédito/i)
     const frecuenciaRadio = screen.getByRole('radio', { name: /mensual/i })
 
-    fireEvent.change(montoInput, { target: { value: '5000000' } })
+    fireEvent.input(montoInput, { target: { value: '5000000' } })
     fireEvent.change(plazoSelect, { target: { value: '12' } })
     fireEvent.change(destinoTextarea, {
       target: { value: 'Capital de trabajo para compra de inventario' },
@@ -29,7 +29,7 @@ describe('Debug Navigation', () => {
 
     // Wait for all values to be set
     await waitFor(() => {
-      expect(montoInput).toHaveValue(5000000)
+      expect(montoInput).toHaveValue('5000000')
     })
 
     // Click next button

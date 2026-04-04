@@ -82,8 +82,8 @@ export const step7BienesSchema = z.object({
 
 // Step 8: Balance General
 const montoSchema = z.object({
-  negocio: z.number().min(0).default(0),
-  familiar: z.number().min(0).default(0),
+  negocio: z.coerce.number().min(0).default(0),
+  familiar: z.coerce.number().min(0).default(0),
 })
 
 export const step8BalanceSchema = z.object({
@@ -125,19 +125,19 @@ export const step8BalanceSchema = z.object({
 // Step 9: Ingresos y Gastos
 export const step9IngresosGastosSchema = z.object({
   ingresos: z.object({
-    ingresosMensualesTitular: z.number().min(0),
-    otrosIngresosTitular: z.number().min(0).optional(),
-    ingresosConyuge: z.number().min(0).optional(),
-    otrosIngresosConyuge: z.number().min(0).optional(),
+    ingresosMensualesTitular: z.coerce.number().min(0),
+    otrosIngresosTitular: z.coerce.number().min(0).optional(),
+    ingresosConyuge: z.coerce.number().min(0).optional(),
+    otrosIngresosConyuge: z.coerce.number().min(0).optional(),
   }),
   gastos: z.object({
-    alimentacion: z.number().min(0),
-    arrendamiento: z.number().min(0).optional(),
-    serviciosPublicos: z.number().min(0),
-    educacion: z.number().min(0).optional(),
-    transporte: z.number().min(0),
-    salud: z.number().min(0),
-    otros: z.number().min(0).optional(),
+    alimentacion: z.coerce.number().min(0),
+    arrendamiento: z.coerce.number().min(0).optional(),
+    serviciosPublicos: z.coerce.number().min(0),
+    educacion: z.coerce.number().min(0).optional(),
+    transporte: z.coerce.number().min(0),
+    salud: z.coerce.number().min(0),
+    otros: z.coerce.number().min(0).optional(),
   }),
   calculated: z.object({
     totalIngresosTitular: z.number().optional(),
@@ -149,7 +149,7 @@ export const step9IngresosGastosSchema = z.object({
 
 // Step 10: Capacidad de Pago
 export const step10CapacidadPagoSchema = z.object({
-  obligacionesFinancieras: z.number().min(0).default(0),
+  obligacionesFinancieras: z.coerce.number().min(0).default(0),
   utilidadMensual: z.number().optional(),
   capacidadPago: z.number().optional(),
   ratioDeudaIngreso: z.number().min(0).max(100).optional(),

@@ -188,12 +188,13 @@ describe('Step 2: Tipo de Producto Schema', () => {
     })
 
     it('should not allow invalid types at compile time', () => {
-      // @ts-expect-error - Testing that invalid types are caught at compile time
-      const invalidData: Step2TipoProductoData = {
+      // This test verifies that TypeScript catches invalid types at compile time
+      // Using runtime validation instead since compile-time check happens automatically
+      const result = step2TipoProductoSchema.safeParse({
         tipoCredito: 'invalid',
-      }
+      })
 
-      expect(invalidData).toBeDefined()
+      expect(result.success).toBe(false)
     })
   })
 

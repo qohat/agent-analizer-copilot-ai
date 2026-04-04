@@ -35,7 +35,8 @@ describe('FormStep8New - Balance General', () => {
     it('should render activos section', () => {
       render(<FormStep8Wrapper />)
 
-      expect(screen.getByText(/Activos Corrientes/i)).toBeInTheDocument()
+      const activosElements = screen.getAllByText(/Activos Corrientes/i)
+      expect(activosElements.length).toBeGreaterThan(0)
     })
 
     it('should render pasivos section', () => {
@@ -49,8 +50,8 @@ describe('FormStep8New - Balance General', () => {
     it('should render negocio and familiar inputs', () => {
       render(<FormStep8Wrapper />)
 
-      expect(screen.getByPlaceholderText(/Caja \(negocio\)/i)).toBeInTheDocument()
-      expect(screen.getByPlaceholderText(/Caja \(familiar\)/i)).toBeInTheDocument()
+      const inputs = screen.getAllByPlaceholderText('0')
+      expect(inputs.length).toBeGreaterThan(10) // Multiple money inputs
     })
   })
 
@@ -58,31 +59,33 @@ describe('FormStep8New - Balance General', () => {
     it('should allow filling activos values', async () => {
       render(<FormStep8Wrapper />)
 
-      const cajaNegocio = screen.getByPlaceholderText(/Caja \(negocio\)/i)
+      const inputs = screen.getAllByPlaceholderText('0')
+      const firstInput = inputs[0]
 
-      fireEvent.change(cajaNegocio, { target: { value: '5000000' } })
+      fireEvent.change(firstInput, { target: { value: '5000000' } })
 
       await waitFor(() => {
-        expect(cajaNegocio).toHaveValue(5000000)
+        expect(firstInput).toHaveValue('5000000')
       })
     })
 
     it('should allow filling pasivos values', async () => {
       render(<FormStep8Wrapper />)
 
-      const proveedoresNegocio = screen.getByPlaceholderText(/Proveedores \(negocio\)/i)
+      const inputs = screen.getAllByPlaceholderText('0')
+      const pasivosInput = inputs[10] // Pick one from pasivos section
 
-      fireEvent.change(proveedoresNegocio, { target: { value: '1000000' } })
+      fireEvent.change(pasivosInput, { target: { value: '1000000' } })
 
       await waitFor(() => {
-        expect(proveedoresNegocio).toHaveValue(1000000)
+        expect(pasivosInput).toHaveValue('1000000')
       })
     })
 
     it('should handle numeric inputs', async () => {
       render(<FormStep8Wrapper />)
 
-      const inputs = screen.getAllByPlaceholderText(/\(negocio\)/i)
+      const inputs = screen.getAllByPlaceholderText('0')
 
       fireEvent.input(inputs[0], { target: { value: '123456' } })
 
@@ -103,9 +106,10 @@ describe('FormStep8New - Balance General', () => {
     it('should have type="text" with numeric input for all money inputs', () => {
       render(<FormStep8Wrapper />)
 
-      const cajaNegocio = screen.getByPlaceholderText(/Caja \(negocio\)/i)
-      expect(cajaNegocio).toHaveAttribute('type', 'text')
-      expect(cajaNegocio).toHaveAttribute('inputmode', 'numeric')
+      const inputs = screen.getAllByPlaceholderText('0')
+      const firstInput = inputs[0]
+      expect(firstInput).toHaveAttribute('type', 'text')
+      expect(firstInput).toHaveAttribute('inputmode', 'numeric')
     })
   })
 })

@@ -23,7 +23,7 @@ describe('Step 2 E2E - Tipo de Producto', () => {
 
     // Fill Step 1 required fields
     const montoInput = screen.getByLabelText(/monto del crédito solicitado/i)
-    fireEvent.change(montoInput, { target: { value: '5000000' } })
+    fireEvent.input(montoInput, { target: { value: '5000000' } })
 
     const plazoSelect = screen.getByLabelText(/plazo del crédito/i)
     fireEvent.change(plazoSelect, { target: { value: '12' } })
@@ -38,7 +38,7 @@ describe('Step 2 E2E - Tipo de Producto', () => {
 
     // Wait for form to be valid
     await waitFor(() => {
-      expect(montoInput).toHaveValue(5000000)
+      expect(montoInput).toHaveValue('5000000')
       expect(plazoSelect).toHaveValue('12')
       expect(frecuenciaRadio).toBeChecked()
     })

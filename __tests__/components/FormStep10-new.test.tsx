@@ -58,10 +58,10 @@ describe('FormStep10New - Capacidad de Pago', () => {
 
       const obligacionesInput = screen.getByLabelText(/Obligaciones financieras actuales/i)
 
-      fireEvent.change(obligacionesInput, { target: { value: '500000' } })
+      fireEvent.input(obligacionesInput, { target: { value: '500000' } })
 
       await waitFor(() => {
-        expect(obligacionesInput).toHaveValue(500000)
+        expect(obligacionesInput).toHaveValue('500000')
       })
     })
 
@@ -70,10 +70,10 @@ describe('FormStep10New - Capacidad de Pago', () => {
 
       const obligacionesInput = screen.getByLabelText(/Obligaciones financieras actuales/i)
 
-      fireEvent.change(obligacionesInput, { target: { value: '0' } })
+      fireEvent.input(obligacionesInput, { target: { value: '0' } })
 
       await waitFor(() => {
-        expect(obligacionesInput).toHaveValue(0)
+        expect(obligacionesInput).toHaveValue('0')
       })
     })
 
@@ -82,10 +82,10 @@ describe('FormStep10New - Capacidad de Pago', () => {
 
       const obligacionesInput = screen.getByLabelText(/Obligaciones financieras actuales/i)
 
-      fireEvent.change(obligacionesInput, { target: { value: '10000000' } })
+      fireEvent.input(obligacionesInput, { target: { value: '10000000' } })
 
       await waitFor(() => {
-        expect(obligacionesInput).toHaveValue(10000000)
+        expect(obligacionesInput).toHaveValue('10000000')
       })
     })
   })

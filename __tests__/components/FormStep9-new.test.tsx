@@ -37,7 +37,8 @@ describe('FormStep9New - Ingresos y Gastos', () => {
       const headings = screen.getAllByRole('heading', { level: 3 })
       const ingresosHeading = headings.find(h => h.textContent?.match(/Ingresos/i))
       expect(ingresosHeading).toBeInTheDocument()
-      expect(screen.getByLabelText(/Ingresos mensuales/i)).toBeInTheDocument()
+      const ingresosInputs = screen.getAllByLabelText(/Ingresos mensuales/i)
+      expect(ingresosInputs.length).toBeGreaterThanOrEqual(1)
     })
 
     it('should render gastos section', () => {
@@ -64,42 +65,44 @@ describe('FormStep9New - Ingresos y Gastos', () => {
     it('should allow filling ingresos titular', async () => {
       render(<FormStep9Wrapper />)
 
-      const ingresosInput = screen.getByLabelText(/Ingresos mensuales/i)
+      const ingresosInputs = screen.getAllByLabelText(/Ingresos mensuales/i)
+      const ingresosInput = ingresosInputs[0]
 
-      fireEvent.change(ingresosInput, { target: { value: '3000000' } })
+      fireEvent.input(ingresosInput, { target: { value: '3000000' } })
 
       await waitFor(() => {
-        expect(ingresosInput).toHaveValue(3000000)
+        expect(ingresosInput).toHaveValue('3000000')
       })
     })
 
     it('should allow filling all gastos fields', async () => {
       render(<FormStep9Wrapper />)
 
-      fireEvent.change(screen.getByLabelText(/Alimentación/i), { target: { value: '800000' } })
-      fireEvent.change(screen.getByLabelText(/Servicios públicos/i), { target: { value: '200000' } })
-      fireEvent.change(screen.getByLabelText(/Transporte/i), { target: { value: '300000' } })
-      fireEvent.change(screen.getByLabelText(/Salud/i), { target: { value: '150000' } })
+      fireEvent.input(screen.getByLabelText(/Alimentación/i), { target: { value: '800000' } })
+      fireEvent.input(screen.getByLabelText(/Servicios públicos/i), { target: { value: '200000' } })
+      fireEvent.input(screen.getByLabelText(/Transporte/i), { target: { value: '300000' } })
+      fireEvent.input(screen.getByLabelText(/Salud/i), { target: { value: '150000' } })
 
       await waitFor(() => {
-        expect(screen.getByLabelText(/Alimentación/i)).toHaveValue(800000)
+        expect(screen.getByLabelText(/Alimentación/i)).toHaveValue('800000')
       })
     })
 
     it('should show capacidad disponible when values entered', async () => {
       render(<FormStep9Wrapper />)
 
-      const ingresosInput = screen.getByLabelText(/Ingresos mensuales/i)
+      const ingresosInputs = screen.getAllByLabelText(/Ingresos mensuales/i)
+      const ingresosInput = ingresosInputs[0]
       const alimentacionInput = screen.getByLabelText(/Alimentación/i)
 
-      fireEvent.change(ingresosInput, { target: { value: '3000000' } })
-      fireEvent.change(alimentacionInput, { target: { value: '800000' } })
-      fireEvent.change(screen.getByLabelText(/Servicios públicos/i), { target: { value: '200000' } })
-      fireEvent.change(screen.getByLabelText(/Transporte/i), { target: { value: '300000' } })
-      fireEvent.change(screen.getByLabelText(/Salud/i), { target: { value: '100000' } })
+      fireEvent.input(ingresosInput, { target: { value: '3000000' } })
+      fireEvent.input(alimentacionInput, { target: { value: '800000' } })
+      fireEvent.input(screen.getByLabelText(/Servicios públicos/i), { target: { value: '200000' } })
+      fireEvent.input(screen.getByLabelText(/Transporte/i), { target: { value: '300000' } })
+      fireEvent.input(screen.getByLabelText(/Salud/i), { target: { value: '100000' } })
 
       await waitFor(() => {
-        expect(screen.getByText(/Capacidad disponible/i)).toBeInTheDocument()
+        expect(screen.getByText(/Excedente Mensual/i)).toBeInTheDocument()
       })
     })
   })
@@ -115,27 +118,31 @@ describe('FormStep9New - Ingresos y Gastos', () => {
     it('should have all inputs with type="text" and numeric inputmode', () => {
       render(<FormStep9Wrapper />)
 
-      const ingresosInput = screen.getByLabelText(/Ingresos mensuales/i)
+      const ingresosInputs = screen.getAllByLabelText(/Ingresos mensuales/i)
+      const ingresosInput = ingresosInputs[0]
       expect(ingresosInput).toHaveAttribute('type', 'text')
       expect(ingresosInput).toHaveAttribute('inputmode', 'numeric')
     })
   })
 
   describe('📊 Calculations', () => {
-    it('should display correct capacidad disponible', async () => {
+    it('should display correct excedente mensual', async () => {
       render(<FormStep9Wrapper />)
 
-      fireEvent.change(screen.getByLabelText(/Ingresos mensuales/i), {
+      const ingresosInputs = screen.getAllByLabelText(/Ingresos mensuales/i)
+      const ingresosInput = ingresosInputs[0]
+
+      fireEvent.input(ingresosInput, {
         target: { value: '5000000' },
       })
-      fireEvent.change(screen.getByLabelText(/Alimentación/i), { target: { value: '1000000' } })
-      fireEvent.change(screen.getByLabelText(/Servicios públicos/i), { target: { value: '500000' } })
-      fireEvent.change(screen.getByLabelText(/Transporte/i), { target: { value: '500000' } })
-      fireEvent.change(screen.getByLabelText(/Salud/i), { target: { value: '300000' } })
+      fireEvent.input(screen.getByLabelText(/Alimentación/i), { target: { value: '1000000' } })
+      fireEvent.input(screen.getByLabelText(/Servicios públicos/i), { target: { value: '500000' } })
+      fireEvent.input(screen.getByLabelText(/Transporte/i), { target: { value: '500000' } })
+      fireEvent.input(screen.getByLabelText(/Salud/i), { target: { value: '300000' } })
 
       await waitFor(() => {
         // Total gastos: 2,300,000
-        // Capacidad: 5,000,000 - 2,300,000 = 2,700,000
+        // Excedente: 5,000,000 - 2,300,000 = 2,700,000
         expect(screen.getByText(/2,700,000/)).toBeInTheDocument()
       })
     })

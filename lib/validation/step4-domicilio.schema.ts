@@ -41,7 +41,7 @@ export const step4DomicilioSchema = z
     nombrePropietario: z.string().min(5, 'Mínimo 5 caracteres').max(100).or(z.literal('')).optional(),
 
     valorArrendado: z
-      .number()
+      .coerce.number()
       .min(0, 'El valor debe ser positivo')
       .max(100000000, 'Valor máximo: $100.000.000')
       .or(z.nan())
