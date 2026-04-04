@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useAuth } from '@/contexts/AuthContext'
 import { step1SolicitudSchema } from '@/lib/validation/step1-solicitud.schema'
 import { step2TipoProductoSchema } from '@/lib/validation/step2-tipo-producto.schema'
 import { step3DatosPersonalesSchema } from '@/lib/validation/step3-datos-personales.schema'
@@ -36,6 +37,7 @@ const TOTAL_STEPS = 11
 const STORAGE_KEY = 'credit-application-draft'
 
 export function MultiStepForm() {
+  const { user, session } = useAuth()
   const [step, setStep] = useState(1)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -55,8 +57,9 @@ export function MultiStepForm() {
   ]
 
   const methods = useForm({
-    resolver: zodResolver(schemas[step - 1]),
-    mode: 'onBlur',  // Validate on blur instead of onChange
+    // Don't use resolver here - it changes per step and can lose data
+    // We'll validate manually when needed
+    mode: 'onBlur',
     reValidateMode: 'onBlur',
     shouldUnregister: false,
     defaultValues: {
@@ -95,23 +98,41 @@ export function MultiStepForm() {
     return () => subscription.unsubscribe()
   }, [methods, step])
 
-  // Update resolver when step changes
+  // Clear errors when step changes
   React.useEffect(() => {
     methods.clearErrors()
   }, [step, methods])
 
   const onNextStep = async () => {
-    // Trigger validation to show all errors
-    const stepIsValid = await methods.trigger()
+    // Get current form values
+    const currentValues = methods.getValues()
 
-    if (stepIsValid && step < TOTAL_STEPS) {
+    // Validate only the current step's fields
+    const currentSchema = schemas[step - 1]
+    const validationResult = currentSchema.safeParse(currentValues)
+
+    if (validationResult.success && step < TOTAL_STEPS) {
+      // Valid, move to next step
       setStep(step + 1)
       window.scrollTo({ top: 0, behavior: 'smooth' })
-    } else if (!stepIsValid) {
+    } else if (!validationResult.success) {
+      // Invalid, show errors
+      console.warn('Step validation failed:', validationResult.error.errors)
+
+      // Set errors manually
+      validationResult.error.errors.forEach((error) => {
+        const fieldName = error.path.join('.') as any
+        methods.setError(fieldName, {
+          type: 'manual',
+          message: error.message,
+        })
+      })
+
       // Scroll to first error
-      const firstError = Object.keys(methods.formState.errors)[0]
-      if (firstError) {
-        const element = document.getElementsByName(firstError)[0]
+      const firstError = validationResult.error.errors[0]
+      if (firstError && firstError.path.length > 0) {
+        const fieldName = firstError.path.join('.')
+        const element = document.getElementsByName(fieldName)[0]
         element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
     }
@@ -127,19 +148,64 @@ export function MultiStepForm() {
   const onSubmit = async (data: any) => {
     setLoading(true)
     try {
-      // Submit to backend API
+      // Import the mapper function and diagnostic tools
+      const { mapFormDataToApplicationCreate } = await import('@/lib/validation/form-mapper')
+      const { diagnoseFormData, compareFormData } = await import('@/lib/validation/diagnose-mapper')
+
+      // Map Spanish field names to English field names expected by the API
+      const mappedData = mapFormDataToApplicationCreate(data)
+
+      console.log('Form data (raw):', data)
+      console.log('Form data (mapped):', mappedData)
+
+      // Run diagnostic
+      compareFormData(data, mappedData)
+      diagnoseFormData(mappedData)
+
+      // Check if user is authenticated
+      if (!user || !session?.access_token) {
+        alert('Debes iniciar sesión para enviar una solicitud')
+        return
+      }
+
+      // Submit to backend API with JWT token
       const response = await fetch('/api/applications', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(mappedData),
       })
+
       if (response.ok) {
         setSubmitted(true)
+        // Clear localStorage after successful submission
+        localStorage.removeItem(STORAGE_KEY)
       } else {
-        console.error('Submission failed:', response.statusText)
+        const errorData = await response.json()
+        console.error('Submission failed:', response.statusText, errorData)
+
+        // Log detailed validation errors
+        if (errorData.details) {
+          console.error('Validation errors:')
+          if (Array.isArray(errorData.details)) {
+            errorData.details.forEach((err: any, index: number) => {
+              console.error(`  ${index + 1}. Field: ${err.path?.join('.') || 'unknown'}`)
+              console.error(`     Expected: ${err.expected}`)
+              console.error(`     Received: ${err.received}`)
+              console.error(`     Message: ${err.message}`)
+            })
+          } else {
+            console.error(`  ${errorData.details}`)
+          }
+        }
+
+        alert(`Error al enviar la solicitud: ${errorData.error || response.statusText}\n\nRevisa la consola para más detalles.`)
       }
     } catch (err) {
       console.error('Submission error:', err)
+      alert('Error al enviar la solicitud. Por favor, intenta de nuevo.')
     } finally {
       setLoading(false)
     }

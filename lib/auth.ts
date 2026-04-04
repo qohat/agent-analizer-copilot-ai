@@ -1,64 +1,63 @@
 /**
  * Authentication helpers
  *
- * Bypass authentication for development (stores user in localStorage)
- * For production, replace with Supabase JWT validation
+ * Uses Supabase Auth with JWT validation
  */
 
-export interface BypassUser {
+import { supabaseAdmin } from '@/lib/supabase/client'
+
+export interface AuthUser {
   id: string
   email: string
-  role: 'advisor' | 'comite_member' | 'admin'
+  role: string
   institution_id: string
+  name?: string
 }
 
 /**
- * Extract bypass user from request headers or cookies
- * Development: reads from Authorization header (set by client)
- * Production: should validate JWT token instead
+ * Extract and validate user from Supabase JWT token
  */
-export function extractUserFromRequest(request: Request): BypassUser | null {
+export async function extractUserFromRequest(request: Request): Promise<AuthUser | null> {
   try {
-    // Check Authorization header for bypass user (development mode)
-    const authHeader = request.headers.get('Authorization') || request.headers.get('X-Bypass-User')
-
-    if (authHeader) {
-      try {
-        // Header format: "Bearer {json}" or just "{json}"
-        const jsonStr = authHeader.replace(/^Bearer\s+/, '')
-        const user = JSON.parse(jsonStr)
-
-        // Validate required fields
-        if (user.id && user.email && user.role && user.institution_id) {
-          return user as BypassUser
-        }
-      } catch {
-        // Invalid JSON, continue
-      }
+    // Get Authorization header
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader) {
+      return null
     }
 
-    // Check cookies (if set by client)
-    const cookieHeader = request.headers.get('Cookie')
-    if (cookieHeader) {
-      const bypassUserCookie = cookieHeader
-        .split(';')
-        .find(c => c.trim().startsWith('bypass_user='))
-
-      if (bypassUserCookie) {
-        try {
-          const jsonStr = decodeURIComponent(bypassUserCookie.split('=')[1])
-          const user = JSON.parse(jsonStr)
-
-          if (user.id && user.email && user.role && user.institution_id) {
-            return user as BypassUser
-          }
-        } catch {
-          // Invalid cookie, continue
-        }
-      }
+    // Extract token (format: "Bearer <token>")
+    const token = authHeader.replace(/^Bearer\s+/, '')
+    if (!token) {
+      return null
     }
 
-    return null
+    // Validate JWT token with Supabase
+    const { data: { user: authUser }, error } = await supabaseAdmin.auth.getUser(token)
+
+    if (error || !authUser) {
+      console.error('Invalid token:', error)
+      return null
+    }
+
+    // Fetch user profile from database
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('auth_id', authUser.id)
+      .single()
+
+    if (profileError || !profile) {
+      console.error('User profile not found:', profileError)
+      return null
+    }
+
+    return {
+      id: profile.id,
+      email: profile.email,
+      role: profile.role,
+      institution_id: profile.institution_id,
+      name: profile.name,
+    }
   } catch (error) {
     console.error('Error extracting user from request:', error)
     return null
@@ -68,7 +67,7 @@ export function extractUserFromRequest(request: Request): BypassUser | null {
 /**
  * Require authentication - throws error if user not authenticated
  */
-export function requireAuth(user: BypassUser | null): BypassUser {
+export function requireAuth(user: AuthUser | null): AuthUser {
   if (!user) {
     const error = new Error('Unauthorized: No authenticated user found')
     ;(error as any).status = 401
@@ -80,7 +79,7 @@ export function requireAuth(user: BypassUser | null): BypassUser {
 /**
  * Check if user has specific role
  */
-export function hasRole(user: BypassUser | null, role: string | string[]): boolean {
+export function hasRole(user: AuthUser | null, role: string | string[]): boolean {
   if (!user) return false
   const roles = Array.isArray(role) ? role : [role]
   return roles.includes(user.role)
@@ -89,7 +88,7 @@ export function hasRole(user: BypassUser | null, role: string | string[]): boole
 /**
  * Require specific role - throws error if user doesn't have role
  */
-export function requireRole(user: BypassUser | null, role: string | string[]): BypassUser {
+export function requireRole(user: AuthUser | null, role: string | string[]): AuthUser {
   const user_ = requireAuth(user)
   if (!hasRole(user_, role)) {
     const error = new Error(`Forbidden: Required role(s): ${Array.isArray(role) ? role.join(', ') : role}`)
@@ -100,14 +99,13 @@ export function requireRole(user: BypassUser | null, role: string | string[]): B
 }
 
 /**
- * Require same institution - throws error if user is from different institution
+ * Require same institution - throws error if user is not from same institution
  */
-export function requireSameInstitution(user: BypassUser | null, institutionId: string): BypassUser {
+export function requireSameInstitution(user: AuthUser | null, institutionId: string): void {
   const user_ = requireAuth(user)
-  if (user_.institution_id !== institutionId) {
-    const error = new Error('Forbidden: Not authorized to access this institution')
+  if (user_.role !== 'admin' && user_.institution_id !== institutionId) {
+    const error = new Error('Forbidden: Access to this institution is not allowed')
     ;(error as any).status = 403
     throw error
   }
-  return user_
 }

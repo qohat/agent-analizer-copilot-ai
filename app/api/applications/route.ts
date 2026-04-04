@@ -14,7 +14,7 @@ import { z } from 'zod'
  */
 export async function GET(request: Request) {
   try {
-    const user = extractUserFromRequest(request)
+    const user = await extractUserFromRequest(request)
     const authenticatedUser = requireAuth(user)
 
     const { searchParams } = new URL(request.url)
@@ -65,7 +65,7 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
-    const user = extractUserFromRequest(request)
+    const user = await extractUserFromRequest(request)
     const authenticatedUser = requireAuth(user)
 
     // Only advisors can create applications
@@ -82,31 +82,73 @@ export async function POST(request: Request) {
     const validatedData = applicationCreateSchema.parse(body)
 
     const advisorId = authenticatedUser.id
-    const institutionId = authenticatedUser.institution_id
+    let institutionId = authenticatedUser.institution_id
 
-    // Create primary client
+    // Development: Create institution if it doesn't exist
+    if (institutionId && institutionId.startsWith('dev-')) {
+      const { data: existingInstitution } = await supabaseAdmin
+        .from('institutions')
+        .select('id')
+        .eq('id', institutionId)
+        .single()
+
+      if (!existingInstitution) {
+        // Create dev institution
+        const { error: instError } = await supabaseAdmin
+          .from('institutions')
+          .insert({
+            id: institutionId,
+            name: 'Development Institution',
+            country: 'CO',
+            max_commercial_amount: 50000000,
+            max_agricultural_amount: 100000000,
+            min_monthly_income: 800000,
+            default_rate: 0.025,
+            default_months: 12,
+          })
+
+        if (instError) {
+          console.error('Error creating dev institution:', instError)
+        }
+      }
+    }
+
+    // Upsert primary client (insert or update if exists)
     const { data: client, error: clientError } = await supabaseAdmin
       .from('clients')
-      .insert({
-        institution_id: institutionId,
-        first_name: validatedData.clientFirstName,
-        last_name: validatedData.clientLastName,
-        id_number: validatedData.clientIdNumber,
-        id_type: validatedData.clientIdType,
-        date_of_birth: validatedData.clientDateOfBirth,
-        phone: validatedData.clientPhone,
-        email: validatedData.clientEmail,
-        address_street: validatedData.addressStreet,
-        address_city: validatedData.addressCity,
-        address_department: validatedData.addressDepartment,
-        marital_status: validatedData.maritalStatus,
-      })
+      .upsert(
+        {
+          institution_id: institutionId,
+          first_name: validatedData.clientFirstName,
+          last_name: validatedData.clientLastName,
+          id_number: validatedData.clientIdNumber,
+          id_type: validatedData.clientIdType,
+          date_of_birth: validatedData.clientDateOfBirth,
+          phone: validatedData.clientPhone,
+          email: validatedData.clientEmail,
+          address_street: validatedData.addressStreet,
+          address_city: validatedData.addressCity,
+          address_department: validatedData.addressDepartment,
+          marital_status: validatedData.maritalStatus,
+        },
+        {
+          onConflict: 'institution_id,id_number,id_type',
+          ignoreDuplicates: false,
+        }
+      )
       .select()
       .single()
 
     if (clientError) {
       console.error('Error creating client:', clientError)
-      return NextResponse.json({ error: 'Failed to create client' }, { status: 500 })
+      return NextResponse.json(
+        {
+          error: 'Failed to create client',
+          details: clientError.message,
+          code: clientError.code,
+        },
+        { status: 500 }
+      )
     }
 
     let spouseId: string | null = null
@@ -146,7 +188,7 @@ export async function POST(request: Request) {
         client_id: client.id,
         spouse_id: spouseId,
         coapplicant_id: coapplicantId,
-        application_type: validatedData.productType,
+        product_type: validatedData.productType,
         requested_amount: validatedData.requestedAmount,
         requested_months: validatedData.loanTermMonths,
         purpose: validatedData.businessDescription,
