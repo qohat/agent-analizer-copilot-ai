@@ -1,17 +1,26 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { Lock, Mail, AlertCircle } from 'lucide-react'
+import { Lock, Mail, AlertCircle, Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login } = useAuth()
+  const searchParams = useSearchParams()
+  const { user, login, isLoading: authLoading } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!authLoading && user) {
+      const redirect = searchParams.get('redirect') || '/advisor/dashboard'
+      router.push(redirect)
+    }
+  }, [user, authLoading, router, searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,12 +29,25 @@ export default function LoginPage() {
 
     try {
       await login(email, password)
-      router.push('/advisor/dashboard')
+      const redirect = searchParams.get('redirect') || '/advisor/dashboard'
+      router.push(redirect)
     } catch (err) {
       setError((err as Error).message)
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Show loading while checking auth status
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mx-auto mb-4" />
+          <p className="text-slate-400">Verificando sesión...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

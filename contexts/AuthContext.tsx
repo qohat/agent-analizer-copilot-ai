@@ -56,30 +56,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize session on mount
   useEffect(() => {
+    let mounted = true
+
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if (session?.user) {
-        fetchUserProfile(session.user.id).then(setUser)
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+
+        if (error) {
+          console.error('Error getting session:', error)
+          if (mounted) {
+            setIsLoading(false)
+          }
+          return
+        }
+
+        if (mounted) {
+          setSession(session)
+          if (session?.user) {
+            const profile = await fetchUserProfile(session.user.id)
+            setUser(profile)
+          }
+          setIsLoading(false)
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error)
+        if (mounted) {
+          setIsLoading(false)
+        }
       }
-      setIsLoading(false)
-    })
+    }
+
+    initializeAuth()
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session)
-      if (session?.user) {
-        const profile = await fetchUserProfile(session.user.id)
-        setUser(profile)
-      } else {
-        setUser(null)
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change:', event, session?.user?.email)
+
+      if (mounted) {
+        setSession(session)
+        if (session?.user) {
+          const profile = await fetchUserProfile(session.user.id)
+          setUser(profile)
+        } else {
+          setUser(null)
+        }
+        setIsLoading(false)
       }
-      setIsLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   const login = async (email: string, password: string) => {

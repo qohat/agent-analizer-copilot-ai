@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '@/contexts/AuthContext'
@@ -37,6 +38,7 @@ const TOTAL_STEPS = 11
 const STORAGE_KEY = 'credit-application-draft'
 
 export function MultiStepForm() {
+  const router = useRouter()
   const { user, session } = useAuth()
   const [step, setStep] = useState(1)
   const [submitted, setSubmitted] = useState(false)
@@ -224,7 +226,7 @@ export function MultiStepForm() {
           </p>
         </div>
         <button
-          onClick={() => window.location.href = '/advisor/dashboard'}
+          onClick={() => router.push('/advisor/dashboard')}
           className="px-6 py-3 bg-emerald-500 text-slate-950 font-semibold rounded-lg hover:bg-emerald-400 transition"
         >
           Ir al dashboard

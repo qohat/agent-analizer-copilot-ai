@@ -16,7 +16,14 @@ if (!supabaseAnonKey) {
  * Client-side Supabase client (anon key)
  * Used in browser for authenticated operations
  */
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+  },
+})
 
 /**
  * Server-side Supabase client (service role key)
