@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Clock, Search, Filter, ArrowRight, Loader2 } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 
 interface Application {
   id: string
@@ -20,7 +22,8 @@ interface Application {
 
 type StatusType = 'submitted' | 'under_review'
 
-export default function ComiteApplicationsPage() {
+function ComiteApplicationsContent() {
+  const { session } = useAuth()
   const [applications, setApplications] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -29,12 +32,20 @@ export default function ComiteApplicationsPage() {
   const [statusFilter, setStatusFilter] = useState<StatusType | 'all'>('all')
 
   useEffect(() => {
-    fetchApplications()
-  }, [statusFilter, applicationTypeFilter])
+    if (session) {
+      fetchApplications()
+    }
+  }, [statusFilter, applicationTypeFilter, session])
 
   const fetchApplications = async () => {
     try {
       setLoading(true)
+
+      if (!session?.access_token) {
+        setError('No autenticado')
+        return
+      }
+
       const url = new URL('/api/applications?limit=100', window.location.origin)
 
       // Filter for pending review
@@ -45,8 +56,16 @@ export default function ComiteApplicationsPage() {
         url.searchParams.set('status', 'submitted')
       }
 
-      const response = await fetch(url.toString())
-      if (!response.ok) throw new Error('Failed to fetch applications')
+      const response = await fetch(url.toString(), {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || 'Failed to fetch applications')
+      }
 
       const data = await response.json()
       let apps = data.applications || []
@@ -276,5 +295,13 @@ export default function ComiteApplicationsPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function ComiteApplicationsPage() {
+  return (
+    <ProtectedRoute allowedRoles={['comite_member', 'admin']}>
+      <ComiteApplicationsContent />
+    </ProtectedRoute>
   )
 }
