@@ -148,6 +148,15 @@ export function FormStep7New() {
         <p className="text-slate-400">Información sobre sus bienes y referencias personales.</p>
       </div>
 
+      {/* Error general del formulario */}
+      {errors.root && (
+        <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg">
+          <p className="text-sm text-red-400" role="alert">
+            {String(errors.root.message || 'Error de validación')}
+          </p>
+        </div>
+      )}
+
       {/* Bienes Raíces */}
       <div className="space-y-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700">
         <div className="flex items-center justify-between">
@@ -306,10 +315,6 @@ export function FormStep7New() {
             </div>
           </div>
         ))}
-
-        {errors.referencias && (
-          <p className="text-sm text-red-400" role="alert">{String(errors.referencias.message)}</p>
-        )}
       </div>
     </div>
   )

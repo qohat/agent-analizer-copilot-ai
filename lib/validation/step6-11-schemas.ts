@@ -77,7 +77,6 @@ export const step7BienesSchema = z.object({
   },
   {
     message: 'Debe proporcionar al menos 2 referencias completas (nombre, teléfono y dirección)',
-    path: ['referencias'],
   }
 )
 
