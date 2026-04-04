@@ -26,9 +26,9 @@ export const step6ConyugeSchema = z.object({
 
 // Step 7: Bienes y Referencias
 const referenciaSchema = z.object({
-  nombre: z.string().min(5),
-  telefono: z.string().min(7),
-  direccion: z.string().min(10),
+  nombre: z.string().min(5, 'Mínimo 5 caracteres').or(z.literal('')).optional(),
+  telefono: z.string().min(7, 'Mínimo 7 caracteres').or(z.literal('')).optional(),
+  direccion: z.string().min(10, 'Mínimo 10 caracteres').or(z.literal('')).optional(),
 })
 
 const bienRaizSchema = z.object({
@@ -50,11 +50,36 @@ export const step7BienesSchema = z.object({
   bienesRaices: z.array(bienRaizSchema).max(3).optional(),
   vehiculos: z.array(vehiculoSchema).max(2).optional(),
   referencias: z.object({
-    familiar: referenciaSchema,
-    comercial: referenciaSchema,
-    personal: referenciaSchema,
+    familiar: referenciaSchema.optional(),
+    comercial: referenciaSchema.optional(),
+    personal: referenciaSchema.optional(),
   }),
-})
+}).refine(
+  (data) => {
+    // Contar cuántas referencias están completas
+    const referencias = data.referencias || {}
+    let referenciasCompletas = 0
+
+    // Verificar cada tipo de referencia
+    const tipos: ('familiar' | 'comercial' | 'personal')[] = ['familiar', 'comercial', 'personal']
+
+    for (const tipo of tipos) {
+      const ref = referencias[tipo]
+      if (ref && ref.nombre && ref.nombre.length >= 5 &&
+          ref.telefono && ref.telefono.length >= 7 &&
+          ref.direccion && ref.direccion.length >= 10) {
+        referenciasCompletas++
+      }
+    }
+
+    // Requerir al menos 2 referencias completas
+    return referenciasCompletas >= 2
+  },
+  {
+    message: 'Debe proporcionar al menos 2 referencias completas (nombre, teléfono y dirección)',
+    path: ['referencias'],
+  }
+)
 
 // Step 8: Balance General
 const montoSchema = z.object({

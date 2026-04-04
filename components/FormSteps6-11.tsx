@@ -277,10 +277,15 @@ export function FormStep7New() {
 
       {/* Referencias Personales */}
       <div className="space-y-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Users className="w-5 h-5 text-emerald-400" />
-          Referencias Personales
-        </h3>
+        <div>
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Users className="w-5 h-5 text-emerald-400" />
+            Referencias Personales
+          </h3>
+          <p className="text-sm text-slate-400 mt-1">
+            Proporcione al menos <span className="text-emerald-400 font-semibold">2 referencias completas</span> (puede completar las 3 si lo desea)
+          </p>
+        </div>
 
         {['familiar', 'comercial', 'personal'].map((tipo) => (
           <div key={tipo} className="space-y-2 p-3 bg-slate-700/50 rounded-lg border border-slate-600">
@@ -301,6 +306,10 @@ export function FormStep7New() {
             </div>
           </div>
         ))}
+
+        {errors.referencias && (
+          <p className="text-sm text-red-400" role="alert">{String(errors.referencias.message)}</p>
+        )}
       </div>
     </div>
   )
