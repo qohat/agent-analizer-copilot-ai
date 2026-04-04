@@ -14,13 +14,13 @@ export default function LandingPage() {
           </div>
           <div className="flex gap-6">
             <Link
-              href="/auth/login"
+              href="/login"
               className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-emerald-400 transition"
             >
               Ingresar
             </Link>
             <Link
-              href="/auth/signup"
+              href="/login"
               className="px-6 py-2 bg-emerald-500 text-slate-950 text-sm font-semibold rounded-lg hover:bg-emerald-400 transition"
             >
               Comenzar
@@ -45,7 +45,7 @@ export default function LandingPage() {
 
           <div className="flex gap-4 justify-center pt-4">
             <Link
-              href="/auth/signup"
+              href="/login"
               className="px-8 py-4 bg-emerald-500 text-slate-950 font-bold rounded-lg hover:bg-emerald-400 transition flex items-center gap-2"
             >
               Acceder a la app <ArrowRight className="w-5 h-5" />
