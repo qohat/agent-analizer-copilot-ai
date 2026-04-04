@@ -12,7 +12,7 @@ import { analyzeCommercialCredit, analyzeAgriculturalCredit } from '@/lib/ai/cre
  */
 export async function POST(request: Request) {
   try {
-    const user = extractUserFromRequest(request)
+    const user = await extractUserFromRequest(request)
     const authenticatedUser = requireAuth(user)
 
     const body = await request.json()

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/client'
 import { applicationCreateSchema } from '@/lib/validation/schemas'
+import { mapFormDataToApplicationRecord } from '@/lib/validation/form-mapper'
 import { extractUserFromRequest, requireAuth, hasRole } from '@/lib/auth'
 import { z } from 'zod'
 
@@ -179,32 +180,23 @@ export async function POST(request: Request) {
       }
     }
 
-    // Create application with mapped fields
+    // Map ALL form data to database fields (comprehensive mapping)
+    const allMappedData = mapFormDataToApplicationRecord(body)
+
+    // Create application with ALL mapped fields
+    const applicationPayload = {
+      institution_id: institutionId,
+      advisor_id: advisorId,
+      client_id: client.id,
+      spouse_id: spouseId,
+      coapplicant_id: coapplicantId,
+      status: 'draft',
+      ...allMappedData, // Spread all mapped fields
+    }
+
     const { data: application, error: appError } = await supabaseAdmin
       .from('applications')
-      .insert({
-        institution_id: institutionId,
-        advisor_id: advisorId,
-        client_id: client.id,
-        spouse_id: spouseId,
-        coapplicant_id: coapplicantId,
-        product_type: validatedData.productType,
-        requested_amount: validatedData.requestedAmount,
-        requested_months: validatedData.loanTermMonths,
-        purpose: validatedData.businessDescription,
-        business_name: validatedData.businessName,
-        business_type: validatedData.businessLegalForm,
-        business_years_operating: validatedData.businessYearsOperating,
-        business_monthly_sales: 0, // Placeholder, not in schema
-        client_monthly_income: validatedData.primaryIncomeMonthly,
-        spouse_monthly_income: validatedData.spouseIncomeMonthly,
-        coapplicant_monthly_income: validatedData.coapplicantIncomeMonthly,
-        other_monthly_income: validatedData.secondaryIncomeMonthly,
-        monthly_personal_expenses: validatedData.householdExpensesMonthly,
-        monthly_business_expenses: validatedData.businessExpensesMonthly,
-        monthly_other_obligations: validatedData.debtObligationsMonthly,
-        status: 'draft',
-      })
+      .insert(applicationPayload)
       .select()
       .single()
 

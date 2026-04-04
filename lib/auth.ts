@@ -14,6 +14,8 @@ export interface AuthUser {
   name?: string
 }
 
+export type BypassUser = AuthUser
+
 /**
  * Extract and validate user from Supabase JWT token
  */

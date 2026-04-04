@@ -51,12 +51,7 @@ export function mapFormDataToApplicationCreate(formData: any): Partial<Applicati
     addressStreet: formData.direccion || formData.direccionResidencia,
     addressCity: formData.municipio || formData.ciudad || formData.ciudadResidencia,
     addressDepartment: formData.departamento || formData.departamentoResidencia,
-    addressPostalCode: formData.codigoPostal,
     addressNeighborhood: formData.barrioVereda || formData.barrio,
-    residenceType: formData.tipoVivienda,
-    residenceYears: formData.antiguedadVivienda,
-    landlordName: formData.nombrePropietario || formData.nombreArrendador,
-    rentAmount: parseNumber(formData.valorArrendado || formData.valorArriendo || 0),
 
     // Step 5: Negocio
     businessName: formData.actividadEconomica || formData.nombreNegocio || formData.razonSocial,
@@ -151,6 +146,144 @@ export function mapFormDataToApplicationCreate(formData: any): Partial<Applicati
 
     // Step 11: Términos y condiciones
     acceptTerms: formData.aceptaTerminos || false,
+  } as Partial<ApplicationCreateInput>
+}
+
+/**
+ * Maps ALL form data for database insertion
+ * This includes fields not in applicationCreateSchema but present in the database
+ */
+export function mapFormDataToApplicationRecord(formData: any): Record<string, any> {
+  const mapped = mapFormDataToApplicationCreate(formData)
+
+  return {
+    // Step 1: Datos de la Solicitud
+    solicitud_numero: formData.numeroSolicitud || `SOL-${Date.now()}`,
+    solicitud_fecha: parseDate(formData.fechaSolicitud) || new Date().toISOString(),
+    solicitud_asesor: formData.nombreAsesor || '',
+    solicitud_institucion: formData.institucion || '',
+    solicitud_canal: formData.canal || 'online',
+
+    // Product & requested amounts
+    product_type: mapped.productType,
+    requested_amount: mapped.requestedAmount,
+    requested_months: mapped.loanTermMonths,
+
+    // Client info (references clients table, but duplicated for searchability)
+    client_monthly_income: mapped.primaryIncomeMonthly,
+    client_secondary_income: mapped.secondaryIncomeMonthly,
+
+    // Spouse info
+    spouse_monthly_income: parseNumber(
+      formData.ingresos?.ingresosConyuge ||
+      formData.ingresosConyuge ||
+      formData.ingresosMensualesConyuge ||
+      0
+    ),
+    has_spouse: mapped.hasSpouse,
+
+    // Address
+    address_residential_time_months: parseNumber(formData.tiempoResidencia) || 0,
+    address_own_rent: formData.tipoVivienda,
+    address_rent_monthly_amount: parseNumber(formData.valorArrendado || formData.valorArriendo || 0),
+
+    // Business info
+    business_name: mapped.businessName,
+    business_type: mapped.businessLegalForm,
+    business_sector: formData.sectorEconomico || '',
+    business_description: mapped.businessDescription,
+    business_registration_number: mapped.businessRegistration,
+    business_address_street: mapped.businessAddressStreet,
+    business_address_city: mapped.businessAddressCity,
+    business_address_department: mapped.businessAddressDepartment,
+    business_phone: formData.celularNegocio || formData.telefonoNegocio,
+    business_years_operating: parseNumber(formData.anosOperacion || formData.antiguedadNegocio || 0),
+    business_months_operating: parseNumber(
+      formData.mesesOperacion ||
+      (formData.anosOperacion ? formData.anosOperacion * 12 : null) ||
+      (formData.antiguedadNegocio ? formData.antiguedadNegocio * 12 : null) ||
+      1
+    ),
+    business_employees_count: parseNumber(formData.numeroEmpleados || 0),
+    business_address_same_as_residential: formData.direccionIgualCasa || false,
+
+    // Step 7: Bienes Raíces (Arrays from form)
+    real_estate_count: formData.bienesRaices?.length || 0,
+    real_estate_1_description: formData.bienesRaices?.[0]?.tipoInmueble || '',
+    real_estate_1_estimated_value: parseNumber(formData.bienesRaices?.[0]?.avaluoComercial) || 0,
+    real_estate_1_location: formData.bienesRaices?.[0]?.ciudad || '',
+    real_estate_1_ownership_percent: 100,
+
+    real_estate_2_description: formData.bienesRaices?.[1]?.tipoInmueble || '',
+    real_estate_2_estimated_value: parseNumber(formData.bienesRaices?.[1]?.avaluoComercial) || 0,
+    real_estate_2_location: formData.bienesRaices?.[1]?.ciudad || '',
+    real_estate_2_ownership_percent: 100,
+
+    real_estate_3_description: formData.bienesRaices?.[2]?.tipoInmueble || '',
+    real_estate_3_estimated_value: parseNumber(formData.bienesRaices?.[2]?.avaluoComercial) || 0,
+    real_estate_3_location: formData.bienesRaices?.[2]?.ciudad || '',
+    real_estate_3_ownership_percent: 100,
+
+    // Step 7: Vehículos (Arrays from form)
+    vehicles_count: formData.vehiculos?.length || 0,
+    vehicle_1_type: formData.vehiculos?.[0]?.clase || '',
+    vehicle_1_year: parseNumber(formData.vehiculos?.[0]?.modelo) || 0,
+    vehicle_1_make: formData.vehiculos?.[0]?.marca || '',
+    vehicle_1_model: formData.vehiculos?.[0]?.modelo || '',
+    vehicle_1_value: parseNumber(formData.vehiculos?.[0]?.valorComercial) || 0,
+    vehicle_1_registration_number: formData.vehiculos?.[0]?.placa || '',
+
+    vehicle_2_type: formData.vehiculos?.[1]?.clase || '',
+    vehicle_2_year: parseNumber(formData.vehiculos?.[1]?.modelo) || 0,
+    vehicle_2_make: formData.vehiculos?.[1]?.marca || '',
+    vehicle_2_model: formData.vehiculos?.[1]?.modelo || '',
+    vehicle_2_value: parseNumber(formData.vehiculos?.[1]?.valorComercial) || 0,
+    vehicle_2_registration_number: formData.vehiculos?.[1]?.placa || '',
+
+    // Step 7: Referencias
+    reference_1_name: formData.referencias?.[0]?.nombre || '',
+    reference_1_relationship: formData.referencias?.[0]?.parentesco || '',
+    reference_1_phone: formData.referencias?.[0]?.celular || '',
+    reference_1_knows_client_years: parseNumber(formData.referencias?.[0]?.tiempoConocimiento) || 0,
+
+    reference_2_name: formData.referencias?.[1]?.nombre || '',
+    reference_2_relationship: formData.referencias?.[1]?.parentesco || '',
+    reference_2_phone: formData.referencias?.[1]?.celular || '',
+    reference_2_knows_client_years: parseNumber(formData.referencias?.[1]?.tiempoConocimiento) || 0,
+
+    reference_3_name: formData.referencias?.[2]?.nombre || '',
+    reference_3_relationship: formData.referencias?.[2]?.parentesco || '',
+    reference_3_phone: formData.referencias?.[2]?.celular || '',
+    reference_3_knows_client_years: parseNumber(formData.referencias?.[2]?.tiempoConocimiento) || 0,
+
+    // Step 8: Balance General - Assets
+    assets_cash_and_equivalents: parseNumber(formData.activos?.efectivo) || 0,
+    assets_savings_accounts: parseNumber(formData.activos?.ahorros) || 0,
+    assets_checking_accounts: parseNumber(formData.activos?.corriente) || 0,
+    assets_accounts_receivable_trade: parseNumber(formData.activos?.cuentasXCobrar) || 0,
+    assets_inventory_raw_materials: parseNumber(formData.activos?.inventarioMP) || 0,
+    assets_inventory_finished_goods: parseNumber(formData.activos?.inventarioPT) || 0,
+    assets_land: parseNumber(formData.activos?.terrenos) || 0,
+    assets_buildings_structures: parseNumber(formData.activos?.construcciones) || 0,
+    assets_furniture_fixtures: parseNumber(formData.activos?.mueblesFijos) || 0,
+    assets_machinery_equipment: parseNumber(formData.activos?.maquinaria) || 0,
+    assets_vehicles_fixed: parseNumber(formData.activos?.vehiculosActivos) || 0,
+
+    // Step 8: Balance General - Liabilities
+    liabilities_accounts_payable_trade: parseNumber(formData.pasivos?.cuentasXPagar) || 0,
+    liabilities_short_term_loans: parseNumber(formData.pasivos?.creditosCortoPlazo) || 0,
+    liabilities_long_term_loans: parseNumber(formData.pasivos?.creditosLargoPlazo) || 0,
+
+    // Step 9: Income & Expenses (detailed)
+    primary_income_source: mapped.primaryIncomeSource,
+    primary_income_monthly: mapped.primaryIncomeMonthly,
+    secondary_income_monthly: mapped.secondaryIncomeMonthly,
+    household_expenses_monthly: mapped.householdExpensesMonthly,
+    business_expenses_monthly: mapped.businessExpensesMonthly,
+    debt_obligations_monthly: mapped.debtObligationsMonthly,
+
+    // Step 11: Términos
+    accept_terms: mapped.acceptTerms,
   }
 }
 

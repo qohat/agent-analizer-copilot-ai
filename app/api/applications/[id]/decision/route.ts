@@ -27,7 +27,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = extractUserFromRequest(request)
+    const user = await extractUserFromRequest(request)
     const authenticatedUser = requireRole(user, ['comite_member', 'admin'])
 
     const body = await request.json()

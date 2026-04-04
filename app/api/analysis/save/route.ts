@@ -29,7 +29,7 @@ const analysisSaveSchema = z.object({
  */
 export async function POST(request: Request) {
   try {
-    const user = extractUserFromRequest(request)
+    const user = await extractUserFromRequest(request)
     const authenticatedUser = requireAuth(user)
 
     // Only advisors and committee members can save analysis

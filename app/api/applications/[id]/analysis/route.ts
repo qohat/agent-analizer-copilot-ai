@@ -16,7 +16,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = extractUserFromRequest(request)
+    const user = await extractUserFromRequest(request)
     const authenticatedUser = requireAuth(user)
 
     // Get application

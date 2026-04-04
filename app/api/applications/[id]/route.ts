@@ -18,7 +18,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = extractUserFromRequest(request)
+    const user = await extractUserFromRequest(request)
     const authenticatedUser = requireAuth(user)
 
     const { data: application, error } = await supabaseAdmin
@@ -73,7 +73,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = extractUserFromRequest(request)
+    const user = await extractUserFromRequest(request)
     const authenticatedUser = requireAuth(user)
 
     const body = await request.json()
@@ -190,7 +190,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = extractUserFromRequest(request)
+    const user = await extractUserFromRequest(request)
     const authenticatedUser = requireAuth(user)
 
     const applicationId = params.id

@@ -35,8 +35,8 @@ export function diagnoseFormData(formData: any) {
       '#': i + 1,
       Field: err.path.join('.'),
       Code: err.code,
-      Expected: err.expected || '-',
-      Received: err.received || '-',
+      Expected: (err as any).expected || '-',
+      Received: (err as any).received || '-',
       Message: err.message,
     }))
   )
@@ -45,16 +45,16 @@ export function diagnoseFormData(formData: any) {
   Object.entries(errorsByField).forEach(([field, errors]) => {
     console.log(`  • ${field}:`)
     errors.forEach((err) => {
-      console.log(`    - ${err.message} (expected: ${err.expected}, got: ${err.received})`)
+      console.log(`    - ${err.message} (expected: ${(err as any).expected}, got: ${(err as any).received})`)
     })
   })
 
   console.log('\n💡 Suggestions:')
   result.error.errors.forEach((err) => {
     const field = err.path.join('.')
-    if (err.code === 'invalid_type' && err.expected === 'string') {
+    if (err.code === 'invalid_type' && (err as any).expected === 'string') {
       console.log(`  • Check if "${field}" exists in form data and is not undefined`)
-    } else if (err.code === 'invalid_type' && err.expected === 'number') {
+    } else if (err.code === 'invalid_type' && (err as any).expected === 'number') {
       console.log(`  • Check if "${field}" is being converted to a number (use z.coerce.number() or parseInt)`)
     } else if (err.code === 'too_small') {
       console.log(`  • Check if "${field}" meets minimum value requirement`)
